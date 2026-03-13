@@ -8,26 +8,23 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oxanium:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:       #080d14;
-    --bg2:      #0d1624;
-    --bg3:      #111e30;
-    --panel:    #0a1422;
-    --border:   rgba(172,193,255,0.18);
-    --border2:  rgba(172,193,255,0.35);
-    --blue:     #2e4d7d;
-    --blue-hi:  #3e67a3;
-    --accent:   #acc1ff;
-    --accent2:  #6b8fd8;
-    --text:     #d8e4ff;
-    --muted:    #6b7fa3;
-    --glow:     rgba(172,193,255,0.08);
-    --glow2:    rgba(172,193,255,0.15);
+    --bg:      #080d14;
+    --bg2:     #0d1624;
+    --bg3:     #111e30;
+    --panel:   #0a1422;
+    --border:  rgba(172,193,255,0.18);
+    --border2: rgba(172,193,255,0.35);
+    --blue:    #2e4d7d;
+    --blue-hi: #3e67a3;
+    --accent:  #acc1ff;
+    --accent2: #6b8fd8;
+    --text:    #d8e4ff;
+    --muted:   #6b7fa3;
+    --glow:    rgba(172,193,255,0.08);
+    --glow2:   rgba(172,193,255,0.15);
   }
-
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
-
   body {
     background: var(--bg);
     color: var(--text);
@@ -36,411 +33,198 @@
     line-height: 1.6;
     overflow-x: hidden;
   }
-
-  /* ─── scanline overlay ─── */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0,0,0,0.08) 2px,
-      rgba(0,0,0,0.08) 4px
-    );
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px);
     pointer-events: none;
     z-index: 9999;
   }
-
-  /* ─── NAV ─── */
   nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 2.5rem;
-    height: 56px;
-    background: rgba(8,13,20,0.85);
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem; height: 56px;
+    background: rgba(8,13,20,0.88);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
   }
-
   .nav-logo {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 1.1rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 10px;
+    font-size: 1.05rem; color: var(--accent);
+    letter-spacing: 0.1em; text-decoration: none;
+    display: flex; align-items: center; gap: 8px;
   }
-
-  .nav-logo .logo-bracket {
-    color: var(--accent2);
-    font-size: 1.3rem;
-  }
-
-  .nav-links {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-    align-items: center;
-  }
-
+  .nav-logo .lb { color: var(--accent2); font-size: 1.2rem; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; align-items: center; }
   .nav-links a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.85rem;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    color: var(--muted); text-decoration: none;
+    font-size: 0.82rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
     transition: color 0.2s;
   }
-
   .nav-links a:hover { color: var(--accent); }
-
   .nav-dl {
     font-family: 'Share Tech Mono', monospace;
-    background: transparent;
-    border: 1px solid var(--accent2);
-    color: var(--accent);
-    padding: 6px 16px;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all 0.2s;
-    text-transform: uppercase;
+    background: transparent; border: 1px solid var(--accent2);
+    color: var(--accent); padding: 6px 16px;
+    font-size: 0.75rem; letter-spacing: 0.1em;
+    cursor: pointer; text-decoration: none;
+    transition: all 0.2s; text-transform: uppercase;
   }
-
   .nav-dl:hover {
-    background: var(--glow2);
-    border-color: var(--accent);
+    background: var(--glow2); border-color: var(--accent);
     box-shadow: 0 0 12px rgba(172,193,255,0.2);
   }
 
-  /* ─── HERO ─── */
+  /* HERO */
   .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 6rem 2rem 4rem;
-    text-align: center;
+    position: relative; min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 6rem 2rem 4rem; text-align: center;
     overflow: hidden;
   }
-
   .hero-grid {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
     background-size: 50px 50px;
     mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
   }
-
   .hero-glow {
-    position: absolute;
-    top: 20%;
-    left: 50%;
+    position: absolute; top: 20%; left: 50%;
     transform: translateX(-50%);
-    width: 600px;
-    height: 300px;
+    width: 600px; height: 300px;
     background: radial-gradient(ellipse, rgba(46,77,125,0.5) 0%, transparent 70%);
     pointer-events: none;
   }
-
   .hero-tag {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.25em;
-    color: var(--accent2);
-    text-transform: uppercase;
+    font-size: 0.68rem; letter-spacing: 0.25em;
+    color: var(--accent2); text-transform: uppercase;
     margin-bottom: 1.2rem;
-    opacity: 0;
-    animation: fadeUp 0.6s 0.2s forwards;
+    opacity: 0; animation: fadeUp 0.6s 0.2s forwards;
   }
-
   .hero h1 {
-    font-family: 'Oxanium', sans-serif;
     font-size: clamp(3.5rem, 9vw, 7rem);
-    font-weight: 800;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: #fff;
-    opacity: 0;
-    animation: fadeUp 0.6s 0.4s forwards;
+    font-weight: 800; line-height: 1;
+    letter-spacing: -0.02em; color: #fff;
+    opacity: 0; animation: fadeUp 0.6s 0.4s forwards;
     text-shadow: 0 0 60px rgba(172,193,255,0.3);
   }
-
-  .hero h1 span {
-    color: var(--accent);
-  }
-
+  .hero h1 span { color: var(--accent); }
   .hero-sub {
-    font-size: 1.1rem;
-    color: var(--muted);
-    max-width: 520px;
-    margin: 1.5rem auto 0;
+    font-size: 1.05rem; color: var(--muted);
+    max-width: 520px; margin: 1.5rem auto 0;
     font-weight: 300;
-    opacity: 0;
-    animation: fadeUp 0.6s 0.6s forwards;
+    opacity: 0; animation: fadeUp 0.6s 0.6s forwards;
   }
-
   .hero-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 2.5rem;
-    justify-content: center;
-    flex-wrap: wrap;
-    opacity: 0;
-    animation: fadeUp 0.6s 0.8s forwards;
+    display: flex; gap: 1rem; margin-top: 2.5rem;
+    justify-content: center; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp 0.6s 0.8s forwards;
   }
-
   .btn-primary {
     font-family: 'Share Tech Mono', monospace;
-    background: var(--blue);
-    border: 1px solid var(--accent2);
-    color: #fff;
-    padding: 12px 28px;
-    font-size: 0.82rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
+    background: var(--blue); border: 1px solid var(--accent2);
+    color: #fff; padding: 12px 28px;
+    font-size: 0.8rem; letter-spacing: 0.12em;
+    text-transform: uppercase; text-decoration: none;
+    cursor: pointer; transition: all 0.2s;
+    position: relative; overflow: hidden;
   }
-
   .btn-primary::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(172,193,255,0.15) 0%, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.2s;
+    opacity: 0; transition: opacity 0.2s;
   }
-
-  .btn-primary:hover {
-    background: var(--blue-hi);
-    box-shadow: 0 0 24px rgba(172,193,255,0.25);
-    border-color: var(--accent);
-  }
-
+  .btn-primary:hover { background: var(--blue-hi); box-shadow: 0 0 24px rgba(172,193,255,0.25); border-color: var(--accent); }
   .btn-primary:hover::before { opacity: 1; }
-
   .btn-secondary {
     font-family: 'Share Tech Mono', monospace;
-    background: transparent;
-    border: 1px solid var(--border2);
-    color: var(--muted);
-    padding: 12px 28px;
-    font-size: 0.82rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.2s;
+    background: transparent; border: 1px solid var(--border2);
+    color: var(--muted); padding: 12px 28px;
+    font-size: 0.8rem; letter-spacing: 0.12em;
+    text-transform: uppercase; text-decoration: none;
+    cursor: pointer; transition: all 0.2s;
   }
-
-  .btn-secondary:hover {
-    border-color: var(--accent2);
-    color: var(--accent);
-  }
-
-  /* ─── PREVIEW ─── */
+  .btn-secondary:hover { border-color: var(--accent2); color: var(--accent); }
   .preview-wrap {
-    margin-top: 4rem;
-    position: relative;
-    opacity: 0;
-    animation: fadeUp 0.8s 1s forwards;
+    margin-top: 4rem; position: relative;
+    opacity: 0; animation: fadeUp 0.8s 1s forwards;
   }
-
   .preview-label {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    font-size: 0.63rem; color: var(--muted);
+    letter-spacing: 0.2em; text-transform: uppercase;
     margin-bottom: 0.8rem;
   }
-
   .preview-img {
     max-width: min(700px, 90vw);
     border: 1px solid var(--border2);
-    box-shadow:
-      0 0 0 1px rgba(172,193,255,0.05),
-      0 32px 80px rgba(0,0,0,0.6),
-      0 0 60px rgba(46,77,125,0.3);
-    display: block;
-    margin: 0 auto;
-    image-rendering: -webkit-optimize-contrast;
+    box-shadow: 0 0 0 1px rgba(172,193,255,0.05), 0 32px 80px rgba(0,0,0,0.6), 0 0 60px rgba(46,77,125,0.3);
+    display: block; margin: 0 auto;
   }
 
-  /* ─── SECTION LAYOUT ─── */
-  .section {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 6rem 2rem;
-  }
-
+  /* SECTIONS */
+  .section { max-width: 960px; margin: 0 auto; padding: 6rem 2rem; }
   .section-tag {
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    color: var(--accent2);
-    text-transform: uppercase;
+    font-size: 0.63rem; letter-spacing: 0.25em;
+    color: var(--accent2); text-transform: uppercase;
     margin-bottom: 0.6rem;
   }
-
   .section h2 {
     font-size: clamp(1.8rem, 4vw, 2.6rem);
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -0.02em;
-    margin-bottom: 1rem;
+    font-weight: 800; color: #fff;
+    letter-spacing: -0.02em; margin-bottom: 1rem;
   }
+  .section-lead { color: var(--muted); font-size: 1rem; max-width: 560px; font-weight: 300; margin-bottom: 3rem; }
+  .divider { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, var(--border2), transparent); }
 
-  .section-lead {
-    color: var(--muted);
-    font-size: 1rem;
-    max-width: 560px;
-    font-weight: 300;
-    margin-bottom: 3rem;
-  }
-
-  /* ─── DIVIDER ─── */
-  .divider {
-    width: 100%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--border2), transparent);
-    margin: 0 auto;
-  }
-
-  /* ─── FEATURE GRID ─── */
+  /* FEATURES */
   .feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-top: 3rem;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border); margin-top: 3rem;
   }
+  .feature-card { background: var(--panel); padding: 1.8rem; transition: background 0.2s; }
+  .feature-card:hover { background: var(--bg3); }
+  .feature-icon { font-family: 'Share Tech Mono', monospace; font-size: 1.3rem; color: var(--accent); margin-bottom: 1rem; display: block; }
+  .feature-card h3 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .feature-card p { font-size: 0.85rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
 
-  .feature-card {
-    background: var(--panel);
-    padding: 1.8rem;
-    transition: background 0.2s;
-  }
-
-  .feature-card:hover {
-    background: var(--bg3);
-  }
-
-  .feature-icon {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 1.4rem;
-    color: var(--accent);
-    margin-bottom: 1rem;
-    display: block;
-  }
-
-  .feature-card h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.5rem;
-    letter-spacing: 0.03em;
-  }
-
-  .feature-card p {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.65;
-    font-weight: 300;
-  }
-
-  /* ─── QUICKSTART ─── */
-  .qs-steps {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    margin-top: 3rem;
-  }
-
-  .qs-step {
-    display: grid;
-    grid-template-columns: 40px 1fr;
-    gap: 1.5rem;
-    align-items: start;
-  }
-
+  /* QUICKSTART */
+  .qs-steps { display: flex; flex-direction: column; gap: 2rem; margin-top: 3rem; }
+  .qs-step { display: grid; grid-template-columns: 40px 1fr; gap: 1.5rem; align-items: start; }
   .qs-num {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--accent2);
-    border: 1px solid var(--accent2);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 2px;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.68rem;
+    color: var(--accent2); border: 1px solid var(--accent2);
+    width: 40px; height: 40px; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
   }
+  .qs-content h3 { font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 0.4rem; }
+  .qs-content p { font-size: 0.88rem; color: var(--muted); margin-bottom: 0.8rem; font-weight: 300; }
 
-  .qs-content h3 {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.4rem;
-  }
-
-  .qs-content p {
-    font-size: 0.88rem;
-    color: var(--muted);
-    margin-bottom: 0.8rem;
-    font-weight: 300;
-  }
-
-  /* ─── CODE BLOCKS ─── */
+  /* CODE */
   .code-wrap {
-    background: #050c14;
-    border: 1px solid var(--border);
+    background: #050c14; border: 1px solid var(--border);
     border-left: 3px solid var(--blue);
-    position: relative;
-    overflow: hidden;
+    position: relative; overflow: hidden;
   }
-
   .code-wrap::before {
     content: attr(data-label);
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    position: absolute;
-    top: 0.7rem;
-    right: 1rem;
+    font-size: 0.58rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: var(--muted);
+    position: absolute; top: 0.7rem; right: 1rem;
   }
-
   pre {
     padding: 1.4rem 1.4rem 1.2rem;
     overflow-x: auto;
     font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82rem;
-    line-height: 1.7;
-    color: var(--text);
+    font-size: 0.8rem; line-height: 1.75; color: var(--text);
   }
-
   .kw  { color: #7baaf7; }
   .fn  { color: #a5d6a7; }
   .str { color: #f48fb1; }
@@ -448,246 +232,90 @@
   .num { color: #ffcc80; }
   .var { color: var(--accent); }
 
-  /* ─── API REFERENCE ─── */
+  /* API */
   #api { background: var(--bg2); }
-
-  .api-section-inner {
-    max-width: 960px;
-    margin: 0 auto;
-    padding: 6rem 2rem;
-  }
-
-  .api-group {
-    margin-top: 3.5rem;
-  }
-
+  .api-inner { max-width: 960px; margin: 0 auto; padding: 6rem 2rem; }
+  .api-group { margin-top: 3.5rem; }
   .api-group-title {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--accent2);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1.5rem;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.63rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent2); border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem; margin-bottom: 1.5rem;
   }
-
   .api-entry {
-    border: 1px solid var(--border);
-    background: var(--panel);
-    margin-bottom: 1rem;
-    transition: border-color 0.2s;
+    border: 1px solid var(--border); background: var(--panel);
+    margin-bottom: 1rem; transition: border-color 0.2s;
   }
-
-  .api-entry:hover {
-    border-color: var(--border2);
-  }
-
+  .api-entry:hover { border-color: var(--border2); }
   .api-header {
-    display: flex;
-    align-items: baseline;
-    gap: 1rem;
-    padding: 1.2rem 1.4rem;
-    cursor: pointer;
-    user-select: none;
-    flex-wrap: wrap;
+    display: flex; align-items: baseline; gap: 1rem;
+    padding: 1.2rem 1.4rem; cursor: pointer;
+    user-select: none; flex-wrap: wrap;
   }
-
-  .api-name {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.95rem;
-    color: var(--accent);
-  }
-
-  .api-sig {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    flex: 1;
-  }
-
+  .api-name { font-family: 'Share Tech Mono', monospace; font-size: 0.92rem; color: var(--accent); }
+  .api-sig { font-family: 'Share Tech Mono', monospace; font-size: 0.73rem; color: var(--muted); flex: 1; }
   .api-badge {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border: 1px solid;
+    font-family: 'Share Tech Mono', monospace; font-size: 0.58rem;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    padding: 2px 8px; border: 1px solid;
   }
-
   .badge-method { color: #a5d6a7; border-color: rgba(165,214,167,0.4); }
   .badge-static { color: #ffcc80; border-color: rgba(255,204,128,0.4); }
   .badge-chain  { color: var(--accent2); border-color: rgba(107,143,216,0.4); }
-
-  .api-body {
-    padding: 0 1.4rem 1.4rem;
-    border-top: 1px solid var(--border);
-    display: none;
-  }
-
+  .api-body { padding: 0 1.4rem 1.4rem; border-top: 1px solid var(--border); display: none; }
   .api-body.open { display: block; }
-
-  .api-desc {
-    font-size: 0.88rem;
-    color: var(--muted);
-    margin: 1rem 0;
-    line-height: 1.7;
-    font-weight: 300;
-  }
-
-  .param-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-    margin-top: 0.8rem;
-  }
-
+  .api-desc { font-size: 0.88rem; color: var(--muted); margin: 1rem 0; line-height: 1.7; font-weight: 300; }
+  .param-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.8rem; }
   .param-table th {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    text-align: left;
-    padding: 0.5rem 0.8rem;
-    border-bottom: 1px solid var(--border);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.58rem;
+    letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted);
+    text-align: left; padding: 0.5rem 0.8rem; border-bottom: 1px solid var(--border);
   }
-
-  .param-table td {
-    padding: 0.6rem 0.8rem;
-    border-bottom: 1px solid rgba(172,193,255,0.06);
-    vertical-align: top;
-  }
-
-  .param-table td:first-child {
-    font-family: 'Share Tech Mono', monospace;
-    color: var(--accent);
-    font-size: 0.8rem;
-    white-space: nowrap;
-  }
-
-  .param-table td:nth-child(2) {
-    font-family: 'Share Tech Mono', monospace;
-    color: #ffcc80;
-    font-size: 0.78rem;
-    white-space: nowrap;
-  }
-
-  .param-table td:nth-child(3) {
-    color: var(--muted);
-    font-size: 0.82rem;
-    font-weight: 300;
-  }
-
+  .param-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(172,193,255,0.06); vertical-align: top; }
+  .param-table td:first-child { font-family: 'Share Tech Mono', monospace; color: var(--accent); font-size: 0.8rem; white-space: nowrap; }
+  .param-table td:nth-child(2) { font-family: 'Share Tech Mono', monospace; color: #ffcc80; font-size: 0.78rem; white-space: nowrap; }
+  .param-table td:nth-child(3) { color: var(--muted); font-size: 0.82rem; font-weight: 300; }
   .return-note {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-top: 1rem;
-    padding: 0.6rem 0.8rem;
-    background: rgba(172,193,255,0.04);
-    border-left: 2px solid var(--accent2);
+    font-family: 'Share Tech Mono', monospace; font-size: 0.73rem; color: var(--muted);
+    margin-top: 1rem; padding: 0.6rem 0.8rem;
+    background: rgba(172,193,255,0.04); border-left: 2px solid var(--accent2);
   }
-
   .return-note span { color: var(--accent); }
-
-  .chevron {
-    margin-left: auto;
-    color: var(--muted);
-    font-size: 0.7rem;
-    font-family: 'Share Tech Mono', monospace;
-    transition: transform 0.2s;
-  }
-
+  .chevron { margin-left: auto; color: var(--muted); font-size: 0.68rem; font-family: 'Share Tech Mono', monospace; transition: transform 0.2s; }
   .api-entry.open .chevron { transform: rotate(180deg); }
 
-  /* ─── EXAMPLE ─── */
-  .example-pair {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1px;
-    background: var(--border);
-    border: 1px solid var(--border);
-    margin-top: 2rem;
+  /* EXAMPLES */
+  .example-block { border: 1px solid var(--border); background: #050c14; margin-top: 1.5rem; }
+  .example-block h4 {
+    font-family: 'Share Tech Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--muted); padding: 0.8rem 1.4rem;
+    border-bottom: 1px solid var(--border);
   }
+  .example-block pre { padding: 1.4rem; }
 
-  .example-panel {
-    background: #050c14;
-    padding: 1.6rem;
-  }
-
-  .example-panel h4 {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  /* ─── NOTES / CALLOUT ─── */
+  /* CALLOUT */
   .callout {
-    display: flex;
-    gap: 1rem;
-    padding: 1rem 1.2rem;
+    display: flex; gap: 1rem; padding: 1rem 1.2rem;
     border: 1px solid rgba(255,204,128,0.25);
     background: rgba(255,204,128,0.04);
-    margin-top: 1.5rem;
-    font-size: 0.85rem;
+    margin-top: 1.5rem; font-size: 0.85rem;
   }
-
-  .callout-icon {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.7rem;
-    color: #ffcc80;
-    margin-top: 2px;
-    white-space: nowrap;
-  }
-
+  .callout-icon { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; color: #ffcc80; margin-top: 2px; white-space: nowrap; }
   .callout p { color: var(--muted); font-weight: 300; line-height: 1.6; }
   .callout strong { color: var(--text); font-weight: 600; }
 
-  /* ─── FOOTER ─── */
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 3rem 2rem;
-    text-align: center;
-  }
+  footer { border-top: 1px solid var(--border); padding: 3rem 2rem; text-align: center; }
+  .footer-logo { font-family: 'Share Tech Mono', monospace; font-size: 1.1rem; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 0.8rem; }
+  .footer-text { font-size: 0.78rem; color: var(--muted); font-weight: 300; }
 
-  .footer-logo {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 1.2rem;
-    color: var(--accent);
-    letter-spacing: 0.1em;
-    margin-bottom: 0.8rem;
-  }
+  code { font-family: 'Share Tech Mono', monospace; font-size: 0.82em; color: var(--accent); background: rgba(172,193,255,0.08); padding: 2px 6px; }
 
-  .footer-text {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-weight: 300;
-  }
-
-  /* ─── ANIMATIONS ─── */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ─── SCROLLBAR ─── */
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--blue); }
   ::-webkit-scrollbar-thumb:hover { background: var(--blue-hi); }
-
-  /* ─── INLINE CODE ─── */
-  code {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 0.82em;
-    color: var(--accent);
-    background: rgba(172,193,255,0.08);
-    padding: 2px 6px;
-  }
 
   @media (max-width: 600px) {
     nav { padding: 0 1rem; }
@@ -699,38 +327,31 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a class="nav-logo" href="#">
-    <span class="logo-bracket">[</span>
-    Widgengine
-    <span class="logo-bracket">]</span>
+    <span class="lb">[</span>Widgengine<span class="lb">]</span>
   </a>
   <ul class="nav-links">
     <li><a href="#quickstart">Quickstart</a></li>
     <li><a href="#api">API</a></li>
     <li><a href="#examples">Examples</a></li>
   </ul>
-  <a class="nav-dl" href="Widgengine_v1_1.rbxm" download>↓ Download</a>
+  <a class="nav-dl" id="nav-dl-btn" href="#">↓ Download</a>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="hero-grid"></div>
   <div class="hero-glow"></div>
   <p class="hero-tag">// Roblox Debug UI Module</p>
   <h1>Widget<span>engine</span></h1>
-  <p class="hero-sub">
-    Build floating debug panels inside Roblox in seconds. Labels, buttons, containers — wired up with a fluent, chainable API.
-  </p>
+  <p class="hero-sub">Build floating debug panels inside Roblox in seconds. Labels, buttons, containers — wired up with a clean, chainable API.</p>
   <div class="hero-actions">
     <a class="btn-primary" href="#quickstart">Get Started →</a>
-    <a class="btn-secondary" href="Widgengine_v1_1.rbxm" download>Download .rbxm</a>
+    <a class="btn-secondary" id="hero-dl-btn" href="#">↓ Download .rbxm</a>
   </div>
-
   <div class="preview-wrap">
-    <p class="preview-label">// live preview in Roblox Studio</p>
-    <img class="preview-img" src="1773369359304_image.png" alt="Widgengine in-game preview" />
+    <p class="preview-label">// live in Roblox</p>
+    <img class="preview-img" src="1773369359304_image.png" alt="Widgengine in-game preview"/>
   </div>
 </section>
 
@@ -740,10 +361,7 @@
 <section class="section">
   <p class="section-tag">// What it does</p>
   <h2>Debugging, minus the boilerplate</h2>
-  <p class="section-lead">
-    Drop a widget onto your screen and populate it with live stats and controls — all from a single require call.
-  </p>
-
+  <p class="section-lead">Drop a widget onto your screen and populate it with live stats and controls — all from a single require call.</p>
   <div class="feature-grid">
     <div class="feature-card">
       <span class="feature-icon">[ ▸ ]</span>
@@ -758,12 +376,12 @@
     <div class="feature-card">
       <span class="feature-icon">[ ⬡ ]</span>
       <h3>Sub-Containers</h3>
-      <p>Group related buttons under a labelled section. Buttons inside containers auto-flow into rows, two per row.</p>
+      <p>Group related buttons under a labelled section. Buttons inside containers auto-flow into rows of two.</p>
     </div>
     <div class="feature-card">
       <span class="feature-icon">[ ↔ ]</span>
       <h3>Draggable & Collapsible</h3>
-      <p>Widgets ship with built-in drag detection and a dropdown toggle — no extra setup needed.</p>
+      <p>Widgets ship with built-in <code>UIDragDetector</code> and a dropdown toggle — no extra setup required.</p>
     </div>
     <div class="feature-card">
       <span class="feature-icon">[ ✦ ]</span>
@@ -773,7 +391,7 @@
     <div class="feature-card">
       <span class="feature-icon">[ ⚠ ]</span>
       <h3>Client-Only Safety</h3>
-      <p>The module guards itself from server execution and warns on duplicate widget names, keeping your output clean.</p>
+      <p>Guards itself from server execution and warns on duplicate widget names — keeping your output clean.</p>
     </div>
   </div>
 </section>
@@ -784,18 +402,16 @@
 <section class="section" id="quickstart">
   <p class="section-tag">// Getting started</p>
   <h2>Up in three steps</h2>
-  <p class="section-lead">Widgengine works wherever a LocalScript (or a Script with <code>RunContext = Client</code>) has access to it.</p>
+  <p class="section-lead">Widgengine works wherever a <code>LocalScript</code> (or a Script with <code>RunContext = Client</code>) has access to it.</p>
 
   <div class="qs-steps">
 
     <div class="qs-step">
       <div class="qs-num">01</div>
       <div class="qs-content">
-        <h3>Import the module</h3>
-        <p>Download the <code>.rbxm</code> and drag it into your Roblox place. Place <strong>Widgengine</strong> anywhere the client can require it — <code>ReplicatedStorage</code> is ideal.</p>
-        <a class="btn-primary" href="Widgengine_v1_1.rbxm" download style="display:inline-block;margin-top:0.2rem;">
-          ↓ Download Widgengine_v1_1.rbxm
-        </a>
+        <h3>Download & place the module</h3>
+        <p>Download the <code>.rbxm</code> and drag it into your Roblox place. <strong>ReplicatedStorage</strong> is recommended so the client can reach it.</p>
+        <a class="btn-primary" id="qs-dl-btn" href="#" style="display:inline-block;margin-top:0.2rem;">↓ Download Widgengine_v1_1.rbxm</a>
       </div>
     </div>
 
@@ -803,11 +419,12 @@
       <div class="qs-num">02</div>
       <div class="qs-content">
         <h3>Require & create a widget</h3>
-        <p>Inside any LocalScript, require the module and call <code>Widgengine.New()</code> with your panel's title.</p>
+        <p>Inside any LocalScript, require the module and call <code>widgengine.New()</code> with your panel's title. Store the result if you plan to add sub-containers later.</p>
         <div class="code-wrap" data-label="localscript.luau">
-<pre><span class="kw">local</span> <span class="var">Widgengine</span> = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
+<pre><span class="kw">local</span> <span class="var">ReplicatedStorage</span> = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"ReplicatedStorage"</span>)
+<span class="kw">local</span> <span class="var">widgengine</span> = <span class="fn">require</span>(<span class="var">ReplicatedStorage</span>.Widgengine)
 
-<span class="kw">local</span> <span class="var">widget</span> = <span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)</pre>
+<span class="kw">local</span> <span class="var">myWidget</span> = <span class="var">widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)</pre>
         </div>
       </div>
     </div>
@@ -816,22 +433,17 @@
       <div class="qs-num">03</div>
       <div class="qs-content">
         <h3>Add labels and buttons</h3>
-        <p>Chain as many components as you need. The widget auto-sizes to fit.</p>
+        <p>Chain <code>:AddLabel</code> and <code>:AddButton</code> calls. For sub-containers, call <code>:AddContainer</code> on the stored widget reference — see the full example below.</p>
         <div class="code-wrap" data-label="localscript.luau">
-<pre><span class="var">widget</span>
-  :<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>()
-      <span class="kw">return</span> <span class="fn">tostring</span>(<span class="fn">math.round</span>(<span class="num">1</span> / <span class="var">game</span>:GetService(<span class="str">"RunService"</span>).RenderStepped:Wait()))
-  <span class="kw">end</span>)
-  :<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
-      <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">game</span>:GetService(<span class="str">"Stats"</span>).Network.ServerStatsItem[<span class="str">"Data Ping"</span>].Value) .. <span class="str">" ms"</span>
-  <span class="kw">end</span>)
-  :<span class="fn">AddButton</span>(<span class="str">"Reset"</span>, <span class="kw">function</span>()
-      <span class="var">game</span>.Players.LocalPlayer.Character:BreakJoints()
-  <span class="kw">end</span>)</pre>
+<pre><span class="var">myWidget</span>:<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>()
+    <span class="kw">return</span> <span class="fn">math.floor</span>(<span class="num">1</span> / <span class="var">currentDelta</span>)
+<span class="kw">end</span>, <span class="kw">false</span>):<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
+    <span class="kw">return</span> <span class="fn">Round</span>(<span class="var">Players</span>.LocalPlayer:<span class="fn">GetNetworkPing</span>() * <span class="num">1000</span>, <span class="num">2</span>) .. <span class="str">" ms"</span>
+<span class="kw">end</span>)</pre>
         </div>
         <div class="callout">
           <span class="callout-icon">// NOTE</span>
-          <p>Labels update automatically. You don't call <code>:AddLabel</code> in a loop — just supply the callback once and Widgengine handles the polling.</p>
+          <p>Labels update automatically. Supply the callback once and Widgengine handles polling. Pass <code>false</code> as the third argument to use a 0.5 s loop instead of <code>RenderStepped</code> — better for cheap stats like ping.</p>
         </div>
       </div>
     </div>
@@ -843,19 +455,17 @@
 
 <!-- API -->
 <section id="api">
-  <div class="api-section-inner">
+  <div class="api-inner">
     <p class="section-tag">// Reference</p>
     <h2>API</h2>
     <p class="section-lead">Click any entry to expand its parameters and return type.</p>
 
-    <!-- Widgengine -->
     <div class="api-group">
       <p class="api-group-title">// Widgengine</p>
 
-      <!-- New -->
       <div class="api-entry" onclick="toggle(this)">
         <div class="api-header">
-          <span class="api-name">Widgengine.New</span>
+          <span class="api-name">widgengine.New</span>
           <span class="api-sig">(WidgetTitle: string) → Widgengine</span>
           <span class="api-badge badge-static">static</span>
           <span class="chevron">▾</span>
@@ -864,13 +474,12 @@
           <p class="api-desc">Creates a new draggable, collapsible widget panel and adds it to the player's <code>ScreenGui</code>. Returns the widget object for chaining. Calling this on the server or with a duplicate title emits a warning and returns <code>nil</code>.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>WidgetTitle</td><td>string</td><td>Unique name shown in the widget's title bar. Also used as the key in <code>Widgengine.Widgets</code>.</td></tr>
+            <tr><td>WidgetTitle</td><td>string</td><td>Unique name shown in the widget's title bar and used as the key in <code>widgengine.Widgets</code>.</td></tr>
           </table>
           <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <!-- AddLabel -->
       <div class="api-entry" onclick="toggle(this)">
         <div class="api-header">
           <span class="api-name">:AddLabel</span>
@@ -880,18 +489,17 @@
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">Adds a two-column row: a left-aligned name and a right-aligned value that refreshes automatically by invoking your callback. The label spans the full widget width and always breaks the button row, starting a new row for any subsequent buttons.</p>
+          <p class="api-desc">Adds a full-width two-column row: a left-aligned name and a right-aligned value that refreshes automatically. A label always breaks any open button row, so subsequent buttons start a new row.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>name</td><td>string</td><td>Static label shown on the left side of the row.</td></tr>
-            <tr><td>callback</td><td>() → string</td><td>Called repeatedly. The returned string is displayed on the right side.</td></tr>
-            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>true</strong>. When true the callback fires every <code>RenderStepped</code> (every frame). Set to <code>false</code> for a 0.5 s polling loop — better for cheap stats like ping.</td></tr>
+            <tr><td>name</td><td>string</td><td>Static label shown on the left side.</td></tr>
+            <tr><td>callback</td><td>() → string</td><td>Called repeatedly. The return value is displayed on the right side.</td></tr>
+            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>true</strong> on the top-level widget — fires every <code>RenderStepped</code>. Pass <code>false</code> for a 0.5 s polling loop.</td></tr>
           </table>
           <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <!-- AddButton -->
       <div class="api-entry" onclick="toggle(this)">
         <div class="api-header">
           <span class="api-name">:AddButton</span>
@@ -901,17 +509,16 @@
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">Adds a full-width button to the widget. The button has hover and press colour tweens built in. If <code>name</code> starts with <code>rbxassetid://</code> the text is hidden and a centred <code>ImageLabel</code> is rendered instead, letting you use any Roblox asset as an icon.</p>
+          <p class="api-desc">Adds a full-width button to the widget with built-in hover and press colour tweens. If <code>name</code> starts with <code>rbxassetid://</code>, the text is hidden and a centred <code>ImageLabel</code> is rendered instead.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>name</td><td>string</td><td>Button label text, <em>or</em> an <code>rbxassetid://</code> URL to render an icon.</td></tr>
-            <tr><td>callback</td><td>() → nil</td><td>Fired when the button is activated (clicked or tapped).</td></tr>
+            <tr><td>name</td><td>string</td><td>Button label text, or an <code>rbxassetid://</code> URL to render an icon.</td></tr>
+            <tr><td>callback</td><td>() → nil</td><td>Fired when the button is activated.</td></tr>
           </table>
           <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <!-- AddContainer -->
       <div class="api-entry" onclick="toggle(this)">
         <div class="api-header">
           <span class="api-name">:AddContainer</span>
@@ -920,17 +527,16 @@
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">Inserts a visually distinct sub-section with its own header label and a semi-transparent background. Returns a <strong>SubContainer</strong> rather than the parent widget — use the SubContainer methods to populate it. To add more items to the parent widget after calling <code>:AddContainer</code>, store the widget reference beforehand.</p>
+          <p class="api-desc">Inserts a visually distinct sub-section with its own header label and semi-transparent background. Returns a <strong>SubContainer</strong> — use its methods to populate it. Because the return type changes, you must store the parent widget in a variable first if you want to keep adding items to it after calling <code>:AddContainer</code>.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>containerName</td><td>string</td><td>Header text shown above the grouped content.</td></tr>
+            <tr><td>containerName</td><td>string</td><td>Header text displayed above the grouped content.</td></tr>
           </table>
-          <div class="return-note">Returns <span>SubContainer</span> — a new sub-container instance.</div>
+          <div class="return-note">Returns <span>SubContainer</span> — a new sub-container instance (not the parent widget).</div>
         </div>
       </div>
     </div>
 
-    <!-- SubContainer -->
     <div class="api-group">
       <p class="api-group-title">// SubContainer</p>
 
@@ -943,10 +549,10 @@
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">Adds a button to the sub-container. Buttons are auto-arranged into rows of up to two. When a row is full a new one is created automatically. Supports <code>rbxassetid://</code> icons exactly like the top-level <code>:AddButton</code>.</p>
+          <p class="api-desc">Adds a button to the sub-container. Buttons are auto-arranged into rows of up to two. When a row is full, a new one is created. Supports <code>rbxassetid://</code> icons identically to the top-level <code>:AddButton</code>.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>name</td><td>string</td><td>Button label text or an <code>rbxassetid://</code> icon URL.</td></tr>
+            <tr><td>name</td><td>string</td><td>Button label or <code>rbxassetid://</code> icon URL.</td></tr>
             <tr><td>callback</td><td>() → nil</td><td>Fired on button activation.</td></tr>
           </table>
           <div class="return-note">Returns <span>SubContainer</span> — chainable.</div>
@@ -962,36 +568,33 @@
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">Adds a live-updating label row inside the sub-container. The label always breaks the current button row, just as it does at the top level. Defaults <code>useRunService</code> to <strong>false</strong> (0.5 s poll) rather than <code>RenderStepped</code>.</p>
+          <p class="api-desc">Adds a live label row inside the sub-container. Defaults <code>useRunService</code> to <strong>false</strong> (0.5 s poll) unlike the top-level version.</p>
           <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
             <tr><td>name</td><td>string</td><td>Static title shown on the left.</td></tr>
-            <tr><td>callback</td><td>() → string</td><td>Returns the value to display on the right.</td></tr>
-            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>false</strong>. Set true for per-frame updates.</td></tr>
+            <tr><td>callback</td><td>() → string</td><td>Returns the value displayed on the right.</td></tr>
+            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>false</strong>. Set <code>true</code> for per-frame updates.</td></tr>
           </table>
           <div class="return-note">Returns <span>SubContainer</span> — chainable.</div>
         </div>
       </div>
     </div>
 
-    <!-- Properties -->
     <div class="api-group">
-      <p class="api-group-title">// Properties</p>
-
+      <p class="api-group-title">// Static Properties</p>
       <div class="api-entry" onclick="toggle(this)">
         <div class="api-header">
-          <span class="api-name">Widgengine.Widgets</span>
+          <span class="api-name">widgengine.Widgets</span>
           <span class="api-sig">{ [string]: WidgetData }</span>
           <span class="api-badge badge-static">static</span>
           <span class="chevron">▾</span>
         </div>
         <div class="api-body">
-          <p class="api-desc">A shared table keyed by widget title that stores every created widget's data. Useful for accessing a widget's <code>UI</code> frame or its <code>Dropped</code> state from outside the creation scope. Direct mutation is not recommended.</p>
+          <p class="api-desc">A shared table keyed by widget title that stores every created widget's internal data. Useful for accessing a widget's <code>UI</code> frame or <code>Dropped</code> state from outside the creation scope. Direct mutation is not recommended.</p>
           <div class="return-note">Type <span>{ [string]: { UI: Frame, Dropped: boolean, Connections: {}, _layoutOrder: number } }</span></div>
         </div>
       </div>
     </div>
-
   </div>
 </section>
 
@@ -1000,78 +603,74 @@
 <!-- EXAMPLES -->
 <section class="section" id="examples">
   <p class="section-tag">// Examples</p>
-  <h2>Full examples</h2>
-  <p class="section-lead">Copy-paste ready. Drop inside a LocalScript and adjust paths.</p>
+  <h2>Full example</h2>
+  <p class="section-lead">A complete LocalScript reproducing both widgets from the screenshot above.</p>
 
-  <div class="example-pair">
-    <div class="example-panel">
-      <h4>// complete debugger widget</h4>
-<pre><span class="kw">local</span> <span class="var">RunService</span>  = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"RunService"</span>)
-<span class="kw">local</span> <span class="var">Stats</span>       = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"Stats"</span>)
-<span class="kw">local</span> <span class="var">Widgengine</span>  = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
+  <div class="example-block">
+    <h4>// localscript — debugger + information widgets</h4>
+<pre><span class="kw">local</span> <span class="var">Players</span>          = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"Players"</span>)
+<span class="kw">local</span> <span class="var">ReplicatedStorage</span> = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"ReplicatedStorage"</span>)
+<span class="kw">local</span> <span class="var">RunService</span>        = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"RunService"</span>)
+<span class="kw">local</span> <span class="var">widgengine</span>        = <span class="fn">require</span>(<span class="var">ReplicatedStorage</span>.Widgengine)
 
-<span class="kw">local</span> <span class="var">fps</span> = <span class="num">0</span>
-<span class="var">RunService</span>.RenderStepped:<span class="fn">Connect</span>(<span class="kw">function</span>(<span class="var">dt</span>)
-    <span class="var">fps</span> = <span class="fn">math.round</span>(<span class="num">1</span> / <span class="var">dt</span>)
+<span class="kw">local</span> <span class="var">currentDelta</span> = <span class="num">0</span>
+
+<span class="kw">local function</span> <span class="fn">Round</span>(<span class="var">num</span>, <span class="var">places</span>)
+    <span class="kw">local</span> <span class="var">mult</span> = <span class="num">10</span> ^ <span class="var">places</span>
+    <span class="kw">return</span> <span class="fn">math.floor</span>(<span class="var">num</span> * <span class="var">mult</span> + <span class="num">0.5</span>) / <span class="var">mult</span>
+<span class="kw">end</span>
+
+<span class="cm">-- Debugger widget</span>
+<span class="kw">local</span> <span class="var">myWidget</span> = <span class="var">widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)
+<span class="var">myWidget</span>:<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>()
+    <span class="kw">return</span> <span class="fn">math.floor</span>(<span class="num">1</span> / <span class="var">currentDelta</span>)
+<span class="kw">end</span>, <span class="kw">false</span>):<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
+    <span class="kw">return</span> <span class="fn">Round</span>(<span class="var">Players</span>.LocalPlayer:<span class="fn">GetNetworkPing</span>() * <span class="num">1000</span>, <span class="num">2</span>) .. <span class="str">" ms"</span>
 <span class="kw">end</span>)
 
-<span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)
-    :<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>() <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">fps</span>) <span class="kw">end</span>, <span class="kw">false</span>)
-    :<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
-        <span class="kw">return</span> <span class="fn">tostring</span>(<span class="fn">math.round</span>(
-            <span class="var">Stats</span>.Network.ServerStatsItem[<span class="str">"Data Ping"</span>].Value
-        )) .. <span class="str">" ms"</span>
-    <span class="kw">end</span>, <span class="kw">false</span>)</pre>
-    </div>
-  </div>
-
-  <div class="example-pair" style="margin-top:1px;">
-    <div class="example-panel">
-      <h4>// widget with sub-containers and icon buttons</h4>
-<pre><span class="kw">local</span> <span class="var">Widgengine</span> = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
-<span class="kw">local</span> <span class="var">Players</span>    = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"Players"</span>)
-<span class="kw">local</span> <span class="var">lp</span>         = <span class="var">Players</span>.LocalPlayer
-
-<span class="kw">local</span> <span class="var">info</span> = <span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Information"</span>)
-
-<span class="cm">-- top-level labels</span>
-<span class="var">info</span>
+<span class="cm">-- Information widget</span>
+<span class="kw">local</span> <span class="var">myOtherWidget</span> = <span class="var">widgengine</span>.<span class="fn">New</span>(<span class="str">"Information"</span>)
     :<span class="fn">AddLabel</span>(<span class="str">"Parts"</span>, <span class="kw">function</span>()
-        <span class="kw">return</span> <span class="fn">tostring</span>(#<span class="var">workspace</span>:<span class="fn">GetDescendants</span>())
-    <span class="kw">end</span>, <span class="kw">false</span>)
+        <span class="kw">return</span> #<span class="var">workspace</span>:<span class="fn">QueryDescendants</span>(<span class="str">"BasePart"</span>)
+    <span class="kw">end</span>)
     :<span class="fn">AddLabel</span>(<span class="str">"Models"</span>, <span class="kw">function</span>()
-        <span class="kw">local</span> <span class="var">n</span> = <span class="num">0</span>
-        <span class="kw">for</span> _, v <span class="kw">in</span> <span class="var">workspace</span>:<span class="fn">GetChildren</span>() <span class="kw">do</span>
-            <span class="kw">if</span> v:IsA(<span class="str">"Model"</span>) <span class="kw">then</span> <span class="var">n</span> += <span class="num">1</span> <span class="kw">end</span>
-        <span class="kw">end</span>
-        <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">n</span>)
-    <span class="kw">end</span>, <span class="kw">false</span>)
+        <span class="kw">return</span> #<span class="var">workspace</span>:<span class="fn">QueryDescendants</span>(<span class="str">"Model"</span>)
+    <span class="kw">end</span>)
 
-<span class="cm">-- "Utils" sub-container with icon + text buttons</span>
-<span class="var">info</span>:<span class="fn">AddContainer</span>(<span class="str">"Utils"</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Reset"</span>,   <span class="kw">function</span>() <span class="var">lp</span>.Character:BreakJoints() <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Summon"</span>,  <span class="kw">function</span>() <span class="cm">--[[ teleport logic ]]</span> <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"rbxassetid://12345678"</span>, <span class="kw">function</span>() <span class="cm">--[[ broom icon ]]</span> <span class="kw">end</span>)
+<span class="cm">-- "Utils" sub-container</span>
+<span class="var">myOtherWidget</span>:<span class="fn">AddContainer</span>(<span class="str">"Utils"</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Reset"</span>, <span class="kw">function</span>()
+        <span class="var">Players</span>.LocalPlayer.Character.Humanoid.Health = <span class="num">0</span>
+    <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Summon"</span>, <span class="kw">function</span>()
+        <span class="var">Instance</span>.<span class="fn">new</span>(<span class="str">"Part"</span>, <span class="var">workspace</span>.Camera).Position = <span class="var">Vector3</span>.<span class="fn">new</span>(<span class="num">0</span>, <span class="num">100</span>, <span class="num">0</span>)
+    <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"rbxassetid://11768945414"</span>, <span class="kw">function</span>()
+        <span class="var">workspace</span>.Camera:<span class="fn">ClearAllChildren</span>()
+    <span class="kw">end</span>)
 
 <span class="cm">-- "MyContainer" sub-container</span>
-<span class="var">info</span>:<span class="fn">AddContainer</span>(<span class="str">"MyContainer"</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Test"</span>,  <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test"</span>)  <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Test2"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test2"</span>) <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Test3"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test3"</span>) <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Test4"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test4"</span>) <span class="kw">end</span>)
-    :<span class="fn">AddButton</span>(<span class="str">"Test5"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test5"</span>) <span class="kw">end</span>)</pre>
-    </div>
+<span class="var">myOtherWidget</span>:<span class="fn">AddContainer</span>(<span class="str">"MyContainer"</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test"</span>,  <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Click!"</span>) <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test2"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Click"</span>)  <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test3"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Click"</span>)  <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test4"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Click"</span>)  <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test5"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Click"</span>)  <span class="kw">end</span>)
+
+<span class="cm">-- Track delta for FPS label</span>
+<span class="var">RunService</span>.PreRender:<span class="fn">Connect</span>(<span class="kw">function</span>(<span class="var">dt</span>)
+    <span class="var">currentDelta</span> = <span class="var">dt</span>
+<span class="kw">end</span>)</pre>
   </div>
 
-  <div class="callout" style="margin-top:2rem;">
-    <span class="callout-icon">// TIP</span>
-    <p><strong>:AddContainer returns the SubContainer, not the widget.</strong> If you need to keep adding items to the parent widget after a container, store the widget in a variable first and call the methods on it separately — do not chain <code>:AddContainer(...):AddButton(...)</code> and then continue chaining on the widget.</p>
+  <div class="callout">
+    <span class="callout-icon">// KEY PATTERN</span>
+    <p><strong>:AddContainer returns the SubContainer, not the widget.</strong> Store the widget in a variable (<code>myOtherWidget</code>) and call each <code>:AddContainer</code> on that variable separately — don't try to chain containers off each other or back onto the widget from a container's return value.</p>
   </div>
 </section>
 
 <div class="divider"></div>
 
-<!-- FOOTER -->
 <footer>
   <div class="footer-logo">[ Widgengine ]</div>
   <p class="footer-text">A Roblox debug UI module &nbsp;·&nbsp; Client-only &nbsp;·&nbsp; Free to use</p>
@@ -1083,6 +682,24 @@
     const open = el.classList.toggle('open');
     body.classList.toggle('open', open);
   }
+
+  // Embedded .rbxm as base64 — triggers a real file download
+  const B64 = "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";
+  function download() {
+    const bin = atob(B64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'application/octet-stream' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'Widgengine_v1_1.rbxm';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  document.getElementById('nav-dl-btn').addEventListener('click', e => { e.preventDefault(); download(); });
+  document.getElementById('hero-dl-btn').addEventListener('click', e => { e.preventDefault(); download(); });
+  document.getElementById('qs-dl-btn').addEventListener('click', e => { e.preventDefault(); download(); });
 </script>
 </body>
 </html>
