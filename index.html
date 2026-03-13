@@ -1,1864 +1,1088 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Widgengine Docs</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Widgengine — Roblox Debug UI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Oxanium:wght@300;400;600;700;800&display=swap" rel="stylesheet">
 <style>
-/* ─── RESET ─── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-/* ─── DESIGN TOKENS ─── */
-:root {
-  --black:   #0a0c0f;
-  --dark:    #0f1217;
-  --panel:   #101318;
-  --tile:    #11141a;
-  --border:  #1a2236;
-  --blue:    #2e4d7d;
-  --blue-hi: #3a6099;
-  --blue-lo: #233d64;
-  --acc:     #acc1ff;
-  --acc-dim: #5a7acc;
-  --white:   #e8edf8;
-  --muted:   #6a7f9e;
-  --muted2:  #3d4f66;
-  --green:   #4ecba0;
-  --orange:  #e5934a;
-  --red:     #e06c75;
-  --px: 'Press Start 2P', monospace;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
-}
-
-/* ─── CHECKERBOARD TILE BG (Roblox Studio vibes) ─── */
-body {
-  background-color: var(--black);
-  background-image:
-    linear-gradient(45deg, var(--tile) 25%, transparent 25%),
-    linear-gradient(-45deg, var(--tile) 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, var(--tile) 75%),
-    linear-gradient(-45deg, transparent 75%, var(--tile) 75%);
-  background-size: 20px 20px;
-  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-  color: var(--white);
-  font-family: var(--sans);
-  font-weight: 300;
-  line-height: 1.7;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ─── SCROLLBAR ─── */
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--black); }
-::-webkit-scrollbar-thumb {
-  background: var(--blue);
-  border: 2px solid var(--black);
-}
-::-webkit-scrollbar-thumb:hover { background: var(--blue-hi); }
-
-/* ─── PIXEL BORDER MIXIN ─── */
-/* A hard 1px box with a brighter inset top-left edge — classic widget chrome */
-.widget-chrome {
-  border: 1px solid var(--acc-dim);
-  box-shadow:
-    inset 1px 1px 0 rgba(172,193,255,0.2),
-    inset -1px -1px 0 rgba(0,0,0,0.5),
-    0 4px 24px rgba(0,0,0,0.6);
-}
-
-/* ═══════════════════════════════════════════
-   TOPBAR  — looks like a widget titlebar
-═══════════════════════════════════════════ */
-#topbar {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 38px;
-  background: var(--blue);
-  border-bottom: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), 0 2px 0 rgba(0,0,0,0.4);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  gap: 14px;
-  z-index: 1000;
-  user-select: none;
-}
-
-.topbar-arrow {
-  width: 0; height: 0;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 8px solid rgba(255,255,255,0.7);
-  transform: rotate(90deg);
-  flex-shrink: 0;
-}
-
-.topbar-title {
-  font-family: var(--px);
-  font-size: 0.55rem;
-  color: #fff;
-  letter-spacing: 0.02em;
-  flex: 1;
-}
-
-.topbar-ver {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.45);
-  letter-spacing: 0.04em;
-}
-
-.topbar-tag {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: rgba(255,255,255,0.5);
-  background: rgba(0,0,0,0.2);
-  padding: 2px 7px;
-  border: 1px solid rgba(255,255,255,0.12);
-}
-
-.hamburger {
-  display: none;
-  background: none;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.7);
-  font-size: 0.75rem;
-  padding: 3px 7px;
-  cursor: pointer;
-  font-family: var(--mono);
-}
-
-/* ═══════════════════════════════════════════
-   LAYOUT
-═══════════════════════════════════════════ */
-.layout {
-  display: flex;
-  padding-top: 38px;
-  min-height: 100vh;
-  max-width: 1180px;
-  margin: 0 auto;
-}
-
-/* ═══════════════════════════════════════════
-   SIDEBAR  — styled as a narrow widget panel
-═══════════════════════════════════════════ */
-#sidebar {
-  width: 230px;
-  flex-shrink: 0;
-  position: sticky;
-  top: 38px;
-  height: calc(100vh - 38px);
-  overflow-y: auto;
-  background: var(--panel);
-  border-right: 1px solid var(--border);
-  padding: 0 0 48px;
-}
-
-#sidebar::-webkit-scrollbar { width: 4px; }
-#sidebar::-webkit-scrollbar-thumb { background: var(--blue-lo); border: none; }
-
-/* Each nav group = a mini-widget with its own titlebar */
-.nav-widget {
-  margin: 12px 8px 0;
-  background: var(--dark);
-  border: 1px solid var(--border);
-  box-shadow: inset 1px 1px 0 rgba(172,193,255,0.07);
-}
-
-.nav-widget-bar {
-  background: var(--blue-lo);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-widget-bar-arrow {
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid rgba(255,255,255,0.5);
-  transform: rotate(90deg);
-  flex-shrink: 0;
-}
-
-.nav-widget-bar span {
-  font-family: var(--px);
-  font-size: 0.4rem;
-  color: rgba(255,255,255,0.8);
-  letter-spacing: 0.03em;
-}
-
-.nav-links { padding: 4px 0; }
-
-.nav-links a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 7px 12px;
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--muted);
-  text-decoration: none;
-  border-left: 2px solid transparent;
-  transition: color 0.1s, background 0.1s, border-color 0.1s;
-}
-
-.nav-links a:hover {
-  color: var(--white);
-  background: rgba(46,77,125,0.25);
-}
-
-.nav-links a.active {
-  color: var(--acc);
-  border-left-color: var(--acc);
-  background: rgba(46,77,125,0.3);
-}
-
-.nav-links a .nav-tag {
-  font-size: 0.55rem;
-  color: var(--muted2);
-  background: var(--panel);
-  border: 1px solid var(--border);
-  padding: 1px 5px;
-}
-
-/* Section divider row (like Utils label in widget) */
-.nav-section-label {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--acc-dim);
-  padding: 8px 12px 3px;
-  letter-spacing: 0.06em;
-  border-top: 1px solid var(--border);
-  margin-top: 2px;
-}
-
-/* ═══════════════════════════════════════════
-   MAIN
-═══════════════════════════════════════════ */
-main {
-  flex: 1;
-  min-width: 0;
-  padding: 0 0 96px;
-}
-
-/* ═══════════════════════════════════════════
-   HERO  — full-width widget titlebar scaled up
-═══════════════════════════════════════════ */
-.hero {
-  background: var(--blue);
-  border-bottom: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 3px 0 rgba(0,0,0,0.4);
-  padding: 40px 48px 44px;
-  position: relative;
-  overflow: hidden;
-}
-
-/* dithered pattern overlay */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle, rgba(172,193,255,0.06) 1px, transparent 1px);
-  background-size: 16px 16px;
-  pointer-events: none;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  bottom: 0; right: 0;
-  width: 340px; height: 100%;
-  background: linear-gradient(to left, rgba(0,0,0,0.25), transparent);
-  pointer-events: none;
-}
-
-.hero-content { position: relative; z-index: 1; }
-
-.hero-kicker {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: rgba(255,255,255,0.45);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.hero-kicker::before {
-  content: '▶';
-  color: rgba(255,255,255,0.3);
-  font-size: 0.5rem;
-}
-
-.hero h1 {
-  font-family: var(--px);
-  font-size: clamp(1rem, 2.5vw, 1.6rem);
-  color: #fff;
-  line-height: 1.6;
-  letter-spacing: 0.04em;
-  margin-bottom: 18px;
-}
-
-.hero h1 em {
-  font-style: normal;
-  color: var(--acc);
-}
-
-.hero-desc {
-  font-family: var(--sans);
-  font-size: 0.9rem;
-  font-weight: 300;
-  color: rgba(255,255,255,0.6);
-  max-width: 480px;
-  line-height: 1.75;
-  margin-bottom: 28px;
-}
-
-.hero-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.pill {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  padding: 4px 10px;
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.55);
-  background: rgba(0,0,0,0.2);
-  letter-spacing: 0.04em;
-}
-
-/* ── Download band ── */
-.dl-band {
-  background: var(--dark);
-  border-top: 1px solid rgba(172,193,255,0.15);
-  border-bottom: 1px solid var(--border);
-  padding: 16px 48px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.dl-info { flex: 1; min-width: 0; }
-
-.dl-info-title {
-  font-family: var(--px);
-  font-size: 0.5rem;
-  color: var(--white);
-  letter-spacing: 0.04em;
-  margin-bottom: 6px;
-}
-
-.dl-info-meta {
-  font-family: var(--mono);
-  font-size: 0.68rem;
-  color: var(--muted2);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.dl-info-meta span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.dl-info-meta .dot {
-  width: 4px; height: 4px;
-  background: var(--muted2);
-  border-radius: 50%;
-}
-
-.dl-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--blue);
-  border: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.12), inset -1px -1px 0 rgba(0,0,0,0.3);
-  color: #fff;
-  font-family: var(--px);
-  font-size: 0.48rem;
-  letter-spacing: 0.04em;
-  padding: 11px 18px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.12s, box-shadow 0.12s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.dl-btn:hover {
-  background: var(--blue-hi);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 12px rgba(172,193,255,0.15);
-}
-
-.dl-btn:active {
-  background: var(--blue-lo);
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.4);
-}
-
-.dl-btn-icon {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
-}
-
-.dl-btn-icon .arr-down {
-  width: 0; height: 0;
-  border-left: 5px solid transparent;
-  border-right: 5px solid transparent;
-  border-top: 6px solid rgba(255,255,255,0.7);
-}
-
-.dl-btn-icon .base-line {
-  width: 10px; height: 2px;
-  background: rgba(255,255,255,0.7);
-}
-
-/* sidebar download widget */
-.nav-dl {
-  margin: 12px 8px 0;
-  background: rgba(46,77,125,0.15);
-  border: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(172,193,255,0.08);
-}
-
-.nav-dl-bar {
-  background: var(--blue-lo);
-  padding: 6px 10px;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-dl-bar span {
-  font-family: var(--px);
-  font-size: 0.4rem;
-  color: rgba(255,255,255,0.8);
-}
-
-.nav-dl-inner { padding: 10px; }
-
-.nav-dl-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  background: var(--blue);
-  border: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-  color: #fff;
-  font-family: var(--px);
-  font-size: 0.42rem;
-  letter-spacing: 0.03em;
-  padding: 9px 12px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.nav-dl-btn:hover { background: var(--blue-hi); }
-
-.nav-dl-meta {
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  color: var(--muted2);
-  text-align: center;
-  margin-top: 7px;
-  letter-spacing: 0.04em;
-}
-
-/* ═══════════════════════════════════════════
-   WIDGET PREVIEW BLOCK
-═══════════════════════════════════════════ */
-.preview-bar {
-  background: var(--dark);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 16px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.preview-bar-label {
-  font-family: var(--px);
-  font-size: 0.4rem;
-  color: var(--muted2);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.preview-bar-label em {
-  font-style: normal;
-  color: var(--acc-dim);
-}
-
-.preview-area {
-  background: var(--black);
-  background-image:
-    linear-gradient(45deg, #0d0f14 25%, transparent 25%),
-    linear-gradient(-45deg, #0d0f14 25%, transparent 25%),
-    linear-gradient(45deg, transparent 75%, #0d0f14 75%),
-    linear-gradient(-45deg, transparent 75%, #0d0f14 75%);
-  background-size: 14px 14px;
-  background-position: 0 0, 0 7px, 7px -7px, -7px 0px;
-  padding: 24px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  border-bottom: 1px solid var(--border);
-}
-
-/* ── Actual widget replica ── */
-.w {
-  width: 200px;
-  font-family: var(--px);
-  font-size: 0.5rem;
-}
-
-.w-bar {
-  background: var(--blue);
-  padding: 7px 9px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid rgba(172,193,255,0.35);
-  border-bottom: none;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
-}
-
-.w-bar .arr {
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid rgba(255,255,255,0.6);
-  transform: rotate(90deg);
-  flex-shrink: 0;
-}
-
-.w-bar span { color: #fff; flex: 1; }
-
-.w-body {
-  background: #101010;
-  border: 1px solid rgba(172,193,255,0.3);
-  border-top: none;
-}
-
-.w-row {
-  padding: 7px 10px;
-  display: flex;
-  justify-content: space-between;
-  border-bottom: 1px solid rgba(255,255,255,0.03);
-}
-
-.w-row:last-child { border-bottom: none; }
-.w-row .wl { color: rgba(255,255,255,0.75); }
-.w-row .wv { color: #fff; }
-
-.w-slabel {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--acc);
-  padding: 5px 10px 2px;
-  border-top: 1px solid rgba(172,193,255,0.12);
-  letter-spacing: 0.04em;
-}
-
-.w-btn {
-  margin: 5px 8px 7px;
-  background: var(--blue);
-  border: 1px solid rgba(172,193,255,0.3);
-  color: #fff;
-  text-align: center;
-  padding: 6px 0;
-  font-family: var(--px);
-  font-size: 0.45rem;
-  cursor: default;
-}
-
-.w-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-  padding: 5px 8px 7px;
-}
-
-.w-grid-btn {
-  background: var(--blue);
-  border: 1px solid rgba(172,193,255,0.25);
-  color: #fff;
-  text-align: center;
-  padding: 5px 4px;
-  font-family: var(--px);
-  font-size: 0.42rem;
-}
-
-/* ═══════════════════════════════════════════
-   DOC SECTIONS
-═══════════════════════════════════════════ */
-.doc-section {
-  padding: 44px 48px;
-  border-bottom: 1px solid var(--border);
-  scroll-margin-top: 58px;
-}
-
-/* Section number label */
-.eyebrow {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  color: var(--muted2);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.eyebrow::before {
-  content: '';
-  display: inline-block;
-  width: 16px;
-  height: 1px;
-  background: var(--muted2);
-}
-
-/* Section heading styled as a mini widget titlebar */
-h2 {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--blue-lo);
-  border: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-  padding: 9px 16px;
-  font-family: var(--px);
-  font-size: 0.65rem;
-  color: #fff;
-  letter-spacing: 0.04em;
-  margin-bottom: 28px;
-  width: 100%;
-}
-
-h2 .h2-arr {
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid rgba(255,255,255,0.45);
-  transform: rotate(90deg);
-  flex-shrink: 0;
-}
-
-h2 .h2-sub {
-  font-family: var(--mono);
-  font-size: 0.62rem;
-  font-weight: 400;
-  color: var(--acc-dim);
-  margin-left: auto;
-  letter-spacing: 0.04em;
-}
-
-h3 {
-  font-family: var(--px);
-  font-size: 0.55rem;
-  color: var(--acc);
-  letter-spacing: 0.06em;
-  margin: 32px 0 14px;
-  padding-left: 10px;
-  border-left: 3px solid var(--acc-dim);
-}
-
-p {
-  font-size: 0.9rem;
-  color: var(--muted);
-  margin-bottom: 14px;
-  line-height: 1.75;
-}
-
-p strong, li strong { color: var(--white); font-weight: 500; }
-
-ul, ol { padding-left: 20px; margin-bottom: 14px; }
-
-li {
-  font-size: 0.88rem;
-  color: var(--muted);
-  margin-bottom: 6px;
-  line-height: 1.65;
-}
-
-p code, li code {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  color: var(--acc);
-  background: rgba(46,77,125,0.2);
-  border: 1px solid var(--border);
-  padding: 1px 5px;
-}
-
-/* ═══════════════════════════════════════════
-   API CARD — widget body style
-═══════════════════════════════════════════ */
-.api-card {
-  background: var(--dark);
-  border: 1px solid var(--border);
-  box-shadow: inset 1px 1px 0 rgba(172,193,255,0.05), 0 2px 12px rgba(0,0,0,0.4);
-  margin-bottom: 28px;
-}
-
-.api-card-head {
-  background: var(--blue-lo);
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.method-badge {
-  font-family: var(--mono);
-  font-size: 0.58rem;
-  padding: 3px 7px;
-  border: 1px solid;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.mb-method  { color: var(--acc);    border-color: var(--acc-dim);    background: rgba(172,193,255,0.1); }
-.mb-static  { color: #c792ea;       border-color: #7a52a8;           background: rgba(199,146,234,0.08); }
-.mb-class   { color: var(--orange); border-color: #8a5520;           background: rgba(229,147,74,0.08); }
-
-.api-sig {
-  font-family: var(--mono);
-  font-size: 0.82rem;
-  color: var(--white);
-  line-height: 1.5;
-}
-
-.sig-fn     { color: #82aaff; }
-.sig-self   { color: #ff9cac; }
-.sig-param  { color: var(--orange); }
-.sig-type   { color: var(--muted2); font-size: 0.75rem; }
-.sig-ret    { color: var(--green); }
-
-.api-card-body { padding: 16px 16px 12px; }
-
-.api-card-body p { margin-bottom: 10px; }
-
-/* Return pill */
-.ret-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: var(--green);
-  background: rgba(78,203,160,0.07);
-  border: 1px solid rgba(78,203,160,0.2);
-  padding: 3px 9px;
-  margin-bottom: 12px;
-}
-
-/* Params table */
-.params {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.83rem;
-  margin: 12px 0;
-}
-
-.params th {
-  text-align: left;
-  font-family: var(--px);
-  font-size: 0.38rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted2);
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--panel);
-}
-
-.params td {
-  padding: 8px 10px;
-  border-bottom: 1px solid rgba(26,34,54,0.5);
-  color: var(--muted);
-  vertical-align: top;
-  font-size: 0.83rem;
-}
-
-.params td:first-child {
-  font-family: var(--mono);
-  font-size: 0.78rem;
-  color: var(--orange);
-}
-
-.params td:nth-child(2) {
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--acc);
-}
-
-.params tr:last-child td { border-bottom: none; }
-
-/* ═══════════════════════════════════════════
-   CODE BLOCKS
-═══════════════════════════════════════════ */
-.code-block {
-  background: #080a0d;
-  border: 1px solid var(--border);
-  box-shadow: inset 0 2px 0 rgba(0,0,0,0.3);
-  margin: 16px 0;
-  overflow: hidden;
-}
-
-.code-top {
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-  padding: 7px 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* pixel traffic lights */
-.tl { display: flex; gap: 4px; }
-.tl span {
-  width: 8px; height: 8px;
-  display: block;
-  border: 1px solid rgba(0,0,0,0.4);
-}
-.tl .r { background: var(--red); }
-.tl .y { background: var(--orange); }
-.tl .g { background: var(--green); }
-
-.code-lang {
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  color: var(--muted2);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.copy-btn {
-  margin-left: auto;
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--muted2);
-  font-family: var(--mono);
-  font-size: 0.6rem;
-  padding: 2px 8px;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  transition: all 0.12s;
-}
-
-.copy-btn:hover { border-color: var(--acc-dim); color: var(--acc); }
-.copy-btn.copied { border-color: var(--green); color: var(--green); }
-
-pre {
-  padding: 18px 16px;
-  overflow-x: auto;
-  font-family: var(--mono);
-  font-size: 0.8rem;
-  line-height: 1.7;
-  background: #080a0d;
-}
-
-.kw  { color: #c792ea; }
-.fn  { color: #82aaff; }
-.str { color: #c3e88d; }
-.num { color: #f78c6c; }
-.cm  { color: var(--muted2); font-style: italic; }
-.op  { color: var(--acc); }
-
-/* ═══════════════════════════════════════════
-   CALLOUTS
-═══════════════════════════════════════════ */
-.callout {
-  padding: 12px 14px;
-  margin: 16px 0;
-  display: flex;
-  gap: 12px;
-  font-size: 0.86rem;
-  line-height: 1.65;
-  border-left: 3px solid;
-}
-
-.callout-icon { flex-shrink: 0; font-size: 0.9rem; margin-top: 1px; }
-.callout p { margin: 0; font-size: 0.86rem; }
-
-.callout.info  { background: rgba(172,193,255,0.05); border-color: var(--acc-dim); }
-.callout.warn  { background: rgba(229,147,74,0.05);  border-color: var(--orange); }
-.callout.tip   { background: rgba(78,203,160,0.05);  border-color: var(--green); }
-.callout.info p  { color: var(--acc); }
-.callout.warn p  { color: var(--orange); }
-.callout.tip p   { color: var(--green); }
-
-/* ═══════════════════════════════════════════
-   STEPS
-═══════════════════════════════════════════ */
-.steps { list-style: none; padding: 0; counter-reset: s; }
-
-.steps li {
-  counter-increment: s;
-  display: flex;
-  gap: 14px;
-  margin-bottom: 18px;
-  align-items: flex-start;
-}
-
-.steps li::before {
-  content: counter(s);
-  font-family: var(--px);
-  font-size: 0.45rem;
-  min-width: 24px; height: 24px;
-  background: var(--blue-lo);
-  border: 1px solid var(--acc-dim);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--acc);
-  flex-shrink: 0;
-  margin-top: 4px;
-}
-
-.steps li p { margin: 0; }
-
-/* ═══════════════════════════════════════════
-   PROPERTIES TABLE (UIBuilder section)
-═══════════════════════════════════════════ */
-.props-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 12px 0;
-  font-size: 0.82rem;
-}
-
-.props-table th {
-  text-align: left;
-  font-family: var(--px);
-  font-size: 0.38rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted2);
-  padding: 7px 10px;
-  border-bottom: 1px solid var(--border);
-  background: var(--panel);
-}
-
-.props-table td {
-  padding: 7px 10px;
-  border-bottom: 1px solid rgba(26,34,54,0.4);
-  color: var(--muted);
-  font-size: 0.82rem;
-  vertical-align: top;
-}
-
-.props-table td:first-child {
-  font-family: var(--mono);
-  font-size: 0.76rem;
-  color: var(--acc);
-}
-
-.props-table td:nth-child(2) {
-  font-family: var(--mono);
-  font-size: 0.72rem;
-  color: var(--muted2);
-}
-
-.props-table tr:last-child td { border-bottom: none; }
-
-/* ═══════════════════════════════════════════
-   FOOTER  — another widget titlebar
-═══════════════════════════════════════════ */
-footer {
-  background: var(--blue-lo);
-  border-top: 1px solid var(--acc-dim);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-  padding: 14px 48px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-left: 230px;
-}
-
-.footer-arr {
-  width: 0; height: 0;
-  border-top: 4px solid transparent;
-  border-bottom: 4px solid transparent;
-  border-left: 6px solid rgba(255,255,255,0.3);
-  transform: rotate(90deg);
-  flex-shrink: 0;
-}
-
-.footer-txt {
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  color: rgba(255,255,255,0.4);
-}
-
-.footer-txt strong { color: rgba(255,255,255,0.7); font-weight: 500; }
-
-/* ═══════════════════════════════════════════
-   PROGRESS BAR
-═══════════════════════════════════════════ */
-#progress {
-  position: fixed;
-  top: 38px; left: 0;
-  height: 2px;
-  background: var(--acc);
-  width: 0%;
-  z-index: 2000;
-  box-shadow: 0 0 8px var(--acc);
-  transition: width 0.08s;
-}
-
-/* ═══════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════ */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.hero { animation: fadeUp 0.4s ease both; }
-.doc-section { animation: fadeUp 0.45s ease both; }
-.doc-section:nth-child(2)  { animation-delay: 0.05s; }
-.doc-section:nth-child(3)  { animation-delay: 0.10s; }
-.doc-section:nth-child(4)  { animation-delay: 0.15s; }
-
-/* ═══════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════ */
-@media (max-width: 800px) {
-  #sidebar {
+  :root {
+    --bg:       #080d14;
+    --bg2:      #0d1624;
+    --bg3:      #111e30;
+    --panel:    #0a1422;
+    --border:   rgba(172,193,255,0.18);
+    --border2:  rgba(172,193,255,0.35);
+    --blue:     #2e4d7d;
+    --blue-hi:  #3e67a3;
+    --accent:   #acc1ff;
+    --accent2:  #6b8fd8;
+    --text:     #d8e4ff;
+    --muted:    #6b7fa3;
+    --glow:     rgba(172,193,255,0.08);
+    --glow2:    rgba(172,193,255,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Oxanium', sans-serif;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── scanline overlay ─── */
+  body::before {
+    content: '';
     position: fixed;
-    top: 38px; left: 0;
-    transform: translateX(-100%);
-    transition: transform 0.2s ease;
-    z-index: 900;
-    border-right: 1px solid var(--acc-dim);
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.08) 2px,
+      rgba(0,0,0,0.08) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
   }
 
-  #sidebar.open { transform: translateX(0); }
+  /* ─── NAV ─── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2.5rem;
+    height: 56px;
+    background: rgba(8,13,20,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
 
-  .overlay {
+  .nav-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .nav-logo .logo-bracket {
+    color: var(--accent2);
+    font-size: 1.3rem;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    align-items: center;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  .nav-dl {
+    font-family: 'Share Tech Mono', monospace;
+    background: transparent;
+    border: 1px solid var(--accent2);
+    color: var(--accent);
+    padding: 6px 16px;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .nav-dl:hover {
+    background: var(--glow2);
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(172,193,255,0.2);
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6rem 2rem 4rem;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(46,77,125,0.5) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.25em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s forwards;
+  }
+
+  .hero h1 {
+    font-family: 'Oxanium', sans-serif;
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #fff;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.4s forwards;
+    text-shadow: 0 0 60px rgba(172,193,255,0.3);
+  }
+
+  .hero h1 span {
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 1.5rem auto 0;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.6s forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.8s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'Share Tech Mono', monospace;
+    background: var(--blue);
+    border: 1px solid var(--accent2);
+    color: #fff;
+    padding: 12px 28px;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(172,193,255,0.15) 0%, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--blue-hi);
+    box-shadow: 0 0 24px rgba(172,193,255,0.25);
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover::before { opacity: 1; }
+
+  .btn-secondary {
+    font-family: 'Share Tech Mono', monospace;
+    background: transparent;
+    border: 1px solid var(--border2);
+    color: var(--muted);
+    padding: 12px 28px;
+    font-size: 0.82rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent2);
+    color: var(--accent);
+  }
+
+  /* ─── PREVIEW ─── */
+  .preview-wrap {
+    margin-top: 4rem;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards;
+  }
+
+  .preview-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+  }
+
+  .preview-img {
+    max-width: min(700px, 90vw);
+    border: 1px solid var(--border2);
+    box-shadow:
+      0 0 0 1px rgba(172,193,255,0.05),
+      0 32px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(46,77,125,0.3);
+    display: block;
+    margin: 0 auto;
+    image-rendering: -webkit-optimize-contrast;
+  }
+
+  /* ─── SECTION LAYOUT ─── */
+  .section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .section-tag {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .section h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+  }
+
+  .section-lead {
+    color: var(--muted);
+    font-size: 1rem;
+    max-width: 560px;
+    font-weight: 300;
+    margin-bottom: 3rem;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border2), transparent);
+    margin: 0 auto;
+  }
+
+  /* ─── FEATURE GRID ─── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  .feature-card {
+    background: var(--panel);
+    padding: 1.8rem;
+    transition: background 0.2s;
+  }
+
+  .feature-card:hover {
+    background: var(--bg3);
+  }
+
+  .feature-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.4rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    display: block;
+  }
+
+  .feature-card h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.65;
+    font-weight: 300;
+  }
+
+  /* ─── QUICKSTART ─── */
+  .qs-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .qs-step {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .qs-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .qs-content h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.4rem;
+  }
+
+  .qs-content p {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+    font-weight: 300;
+  }
+
+  /* ─── CODE BLOCKS ─── */
+  .code-wrap {
+    background: #050c14;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .code-wrap::before {
+    content: attr(data-label);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    position: absolute;
+    top: 0.7rem;
+    right: 1rem;
+  }
+
+  pre {
+    padding: 1.4rem 1.4rem 1.2rem;
+    overflow-x: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .kw  { color: #7baaf7; }
+  .fn  { color: #a5d6a7; }
+  .str { color: #f48fb1; }
+  .cm  { color: var(--muted); font-style: italic; }
+  .num { color: #ffcc80; }
+  .var { color: var(--accent); }
+
+  /* ─── API REFERENCE ─── */
+  #api { background: var(--bg2); }
+
+  .api-section-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+  }
+
+  .api-group {
+    margin-top: 3.5rem;
+  }
+
+  .api-group-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .api-entry {
+    border: 1px solid var(--border);
+    background: var(--panel);
+    margin-bottom: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .api-entry:hover {
+    border-color: var(--border2);
+  }
+
+  .api-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 1.2rem 1.4rem;
+    cursor: pointer;
+    user-select: none;
+    flex-wrap: wrap;
+  }
+
+  .api-name {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--accent);
+  }
+
+  .api-sig {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .api-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid;
+  }
+
+  .badge-method { color: #a5d6a7; border-color: rgba(165,214,167,0.4); }
+  .badge-static { color: #ffcc80; border-color: rgba(255,204,128,0.4); }
+  .badge-chain  { color: var(--accent2); border-color: rgba(107,143,216,0.4); }
+
+  .api-body {
+    padding: 0 1.4rem 1.4rem;
+    border-top: 1px solid var(--border);
     display: none;
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 800;
   }
 
-  .overlay.show { display: block; }
+  .api-body.open { display: block; }
 
-  main { margin-left: 0; }
-  footer { margin-left: 0; }
-  .doc-section { padding: 32px 20px; }
-  .hero { padding: 28px 20px 32px; }
-  .hamburger { display: flex; }
-  .topbar-tag { display: none; }
-}
+  .api-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin: 1rem 0;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .param-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin-top: 0.8rem;
+  }
+
+  .param-table th {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    padding: 0.5rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .param-table td {
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid rgba(172,193,255,0.06);
+    vertical-align: top;
+  }
+
+  .param-table td:first-child {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .param-table td:nth-child(2) {
+    font-family: 'Share Tech Mono', monospace;
+    color: #ffcc80;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .param-table td:nth-child(3) {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 300;
+  }
+
+  .return-note {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1rem;
+    padding: 0.6rem 0.8rem;
+    background: rgba(172,193,255,0.04);
+    border-left: 2px solid var(--accent2);
+  }
+
+  .return-note span { color: var(--accent); }
+
+  .chevron {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-family: 'Share Tech Mono', monospace;
+    transition: transform 0.2s;
+  }
+
+  .api-entry.open .chevron { transform: rotate(180deg); }
+
+  /* ─── EXAMPLE ─── */
+  .example-pair {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+
+  .example-panel {
+    background: #050c14;
+    padding: 1.6rem;
+  }
+
+  .example-panel h4 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  /* ─── NOTES / CALLOUT ─── */
+  .callout {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem 1.2rem;
+    border: 1px solid rgba(255,204,128,0.25);
+    background: rgba(255,204,128,0.04);
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+  }
+
+  .callout-icon {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: #ffcc80;
+    margin-top: 2px;
+    white-space: nowrap;
+  }
+
+  .callout p { color: var(--muted); font-weight: 300; line-height: 1.6; }
+  .callout strong { color: var(--text); font-weight: 600; }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.2rem;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.8rem;
+  }
+
+  .footer-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── SCROLLBAR ─── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--blue-hi); }
+
+  /* ─── INLINE CODE ─── */
+  code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82em;
+    color: var(--accent);
+    background: rgba(172,193,255,0.08);
+    padding: 2px 6px;
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 0 1rem; }
+    .nav-links { display: none; }
+    .qs-step { grid-template-columns: 1fr; }
+    .qs-num { display: none; }
+  }
 </style>
 </head>
 <body>
 
-<div id="progress"></div>
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <span class="logo-bracket">[</span>
+    Widgengine
+    <span class="logo-bracket">]</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#quickstart">Quickstart</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="#examples">Examples</a></li>
+  </ul>
+  <a class="nav-dl" href="Widgengine_v1_1.rbxm" download>↓ Download</a>
+</nav>
 
-<!-- TOPBAR -->
-<div id="topbar">
-  <div class="topbar-arrow"></div>
-  <span class="topbar-title">Widgengine</span>
-  <span class="topbar-tag">LocalScript · Client only</span>
-  <span class="topbar-ver">v1.0</span>
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
-</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <p class="hero-tag">// Roblox Debug UI Module</p>
+  <h1>Widget<span>engine</span></h1>
+  <p class="hero-sub">
+    Build floating debug panels inside Roblox in seconds. Labels, buttons, containers — wired up with a fluent, chainable API.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#quickstart">Get Started →</a>
+    <a class="btn-secondary" href="Widgengine_v1_1.rbxm" download>Download .rbxm</a>
+  </div>
 
-<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+  <div class="preview-wrap">
+    <p class="preview-label">// live preview in Roblox Studio</p>
+    <img class="preview-img" src="1773369359304_image.png" alt="Widgengine in-game preview" />
+  </div>
+</section>
 
-<div class="layout" id="top">
+<div class="divider"></div>
 
-  <!-- ══ SIDEBAR ══ -->
-  <nav id="sidebar">
+<!-- FEATURES -->
+<section class="section">
+  <p class="section-tag">// What it does</p>
+  <h2>Debugging, minus the boilerplate</h2>
+  <p class="section-lead">
+    Drop a widget onto your screen and populate it with live stats and controls — all from a single require call.
+  </p>
 
-    <div class="nav-dl">
-      <div class="nav-dl-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>Download</span>
-      </div>
-      <div class="nav-dl-inner">
-        <a class="nav-dl-btn" href="#" onclick="downloadRbxm(event)">↓ &nbsp;Widgengine_v2.rbxm</a>
-        <div class="nav-dl-meta">.rbxm · Roblox Model</div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feature-icon">[ ▸ ]</span>
+      <h3>Chainable API</h3>
+      <p>Every method returns the widget, so you can wire up an entire panel in one expression without intermediate variables.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">[ ~ ]</span>
+      <h3>Live Labels</h3>
+      <p>Pass a callback and Widgengine polls it for you — either every 0.5 s or on <code>RenderStepped</code> for frame-perfect data.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">[ ⬡ ]</span>
+      <h3>Sub-Containers</h3>
+      <p>Group related buttons under a labelled section. Buttons inside containers auto-flow into rows, two per row.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">[ ↔ ]</span>
+      <h3>Draggable & Collapsible</h3>
+      <p>Widgets ship with built-in drag detection and a dropdown toggle — no extra setup needed.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">[ ✦ ]</span>
+      <h3>Icon Buttons</h3>
+      <p>Pass any <code>rbxassetid://</code> as the button name and it renders as a centred icon image instead of text.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">[ ⚠ ]</span>
+      <h3>Client-Only Safety</h3>
+      <p>The module guards itself from server execution and warns on duplicate widget names, keeping your output clean.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- QUICKSTART -->
+<section class="section" id="quickstart">
+  <p class="section-tag">// Getting started</p>
+  <h2>Up in three steps</h2>
+  <p class="section-lead">Widgengine works wherever a LocalScript (or a Script with <code>RunContext = Client</code>) has access to it.</p>
+
+  <div class="qs-steps">
+
+    <div class="qs-step">
+      <div class="qs-num">01</div>
+      <div class="qs-content">
+        <h3>Import the module</h3>
+        <p>Download the <code>.rbxm</code> and drag it into your Roblox place. Place <strong>Widgengine</strong> anywhere the client can require it — <code>ReplicatedStorage</code> is ideal.</p>
+        <a class="btn-primary" href="Widgengine_v1_1.rbxm" download style="display:inline-block;margin-top:0.2rem;">
+          ↓ Download Widgengine_v1_1.rbxm
+        </a>
       </div>
     </div>
 
-    <div class="nav-widget">
-      <div class="nav-widget-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>Navigation</span>
-      </div>
-      <div class="nav-links">
-        <a href="#overview" class="active">Overview</a>
-        <a href="#quickstart">Quick Start</a>
-        <a href="#concepts">Core Concepts</a>
-      </div>
-    </div>
+    <div class="qs-step">
+      <div class="qs-num">02</div>
+      <div class="qs-content">
+        <h3>Require & create a widget</h3>
+        <p>Inside any LocalScript, require the module and call <code>Widgengine.New()</code> with your panel's title.</p>
+        <div class="code-wrap" data-label="localscript.luau">
+<pre><span class="kw">local</span> <span class="var">Widgengine</span> = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
 
-    <div class="nav-widget">
-      <div class="nav-widget-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>Widgengine</span>
-      </div>
-      <div class="nav-links">
-        <div class="nav-section-label">static</div>
-        <a href="#new">.New()</a>
-        <div class="nav-section-label">methods</div>
-        <a href="#addlabel">:AddLabel()</a>
-        <a href="#addbutton">:AddButton()</a>
-        <a href="#addcontainer">:AddContainer()</a>
-      </div>
-    </div>
-
-    <div class="nav-widget">
-      <div class="nav-widget-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>SubContainer</span>
-      </div>
-      <div class="nav-links">
-        <div class="nav-section-label">methods</div>
-        <a href="#sub-addbutton">:AddButton()</a>
-        <a href="#sub-addlabel">:AddLabel()</a>
-      </div>
-    </div>
-
-    <div class="nav-widget">
-      <div class="nav-widget-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>UIBuilder</span>
-      </div>
-      <div class="nav-links">
-        <a href="#uibuilder">Overview <span class="nav-tag">internal</span></a>
-        <a href="#buildwidget">BuildWidget()</a>
-        <a href="#buildlabel">BuildLabel()</a>
-        <a href="#buildbutton">BuildButton()</a>
-        <a href="#buildsubcontainer">BuildSubContainer()</a>
-      </div>
-    </div>
-
-    <div class="nav-widget">
-      <div class="nav-widget-bar">
-        <div class="nav-widget-bar-arrow"></div>
-        <span>Guides</span>
-      </div>
-      <div class="nav-links">
-        <a href="#chaining">Method Chaining</a>
-        <a href="#examples">Full Examples</a>
-      </div>
-    </div>
-
-  </nav>
-
-  <!-- ══ MAIN ══ -->
-  <main>
-
-    <!-- HERO -->
-    <div class="hero" id="overview">
-      <div class="hero-content">
-        <div class="hero-kicker">Roblox / ModuleScript Documentation</div>
-        <h1>Widgengine<br><em>Simplifying Widgets.</em></h1>
-        <p class="hero-desc">A lightweight module for building in-game debug and control panels. One <code>require()</code>, one <code>.New()</code>, and you're attaching live labels, buttons, and grid containers with a fully chainable API.</p>
-        <div class="hero-pills">
-          <span class="pill">client-only</span>
-          <span class="pill">chainable api</span>
-          <span class="pill">runservice ready</span>
-          <span class="pill">automatic sizing</span>
-          <span class="pill">draggable</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- DOWNLOAD BAND -->
-    <div class="dl-band">
-      <div class="dl-info">
-        <div class="dl-info-title">Widgengine_v2.rbxm</div>
-        <div class="dl-info-meta">
-          <span>Roblox Model File</span>
-          <span class="dot"></span>
-          <span>v2 · Client-side</span>
-          <span class="dot"></span>
-          <span>Place anywhere with client access</span>
-        </div>
-      </div>
-      <a class="dl-btn" href="#" onclick="downloadRbxm(event)">
-        <div class="dl-btn-icon">
-          <div class="arr-down"></div>
-          <div class="base-line"></div>
-        </div>
-        Download .rbxm
-      </a>
-    </div>
-
-    <!-- WIDGET PREVIEW -->
-    <div class="preview-bar">
-      <div class="nav-widget-bar-arrow"></div>
-      <span class="preview-bar-label">Live Preview &mdash; <em>actual widget appearance</em></span>
-    </div>
-    <div class="preview-area">
-      <!-- Widget 1: Information -->
-      <div class="w">
-        <div class="w-bar">
-          <div class="arr"></div>
-          <span>Information</span>
-        </div>
-        <div class="w-body">
-          <div class="w-row"><span class="wl">Parts</span><span class="wv">20</span></div>
-          <div class="w-slabel">Utils</div>
-          <div class="w-btn">Reset</div>
-        </div>
-      </div>
-      <!-- Widget 2: Debugger -->
-      <div class="w">
-        <div class="w-bar">
-          <div class="arr"></div>
-          <span>Debugger</span>
-        </div>
-        <div class="w-body">
-          <div class="w-row"><span class="wl">FPS</span><span class="wv">270</span></div>
-          <div class="w-row"><span class="wl">Ping</span><span class="wv">0 ms</span></div>
-        </div>
-      </div>
-      <!-- Widget 3: with grid -->
-      <div class="w">
-        <div class="w-bar">
-          <div class="arr"></div>
-          <span>Cheats</span>
-        </div>
-        <div class="w-body">
-          <div class="w-row"><span class="wl">Speed</span><span class="wv">16</span></div>
-          <div class="w-slabel">Movement</div>
-          <div class="w-grid">
-            <div class="w-grid-btn">Fly</div>
-            <div class="w-grid-btn">Noclip</div>
-            <div class="w-grid-btn">Speed</div>
-            <div class="w-grid-btn">Jump</div>
-          </div>
+<span class="kw">local</span> <span class="var">widget</span> = <span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)</pre>
         </div>
       </div>
     </div>
 
-    <!-- QUICK START -->
-    <section class="doc-section" id="quickstart">
-      <div class="eyebrow">01 · Getting Started</div>
-      <h2><span class="h2-arr"></span>Quick Start <span class="h2-sub">setup in 4 steps</span></h2>
-
-      <p>Download the <code>.rbxm</code> above and insert it into Roblox Studio. Widgengine can be placed <strong>anywhere the client has access</strong> — <code>ReplicatedStorage</code>, <code>StarterPlayerScripts</code>, inside a LocalScript, wherever. As long as the LocalScript can reach it via <code>require()</code>, it will work.</p>
-
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">valid placement locations</span>
+    <div class="qs-step">
+      <div class="qs-num">03</div>
+      <div class="qs-content">
+        <h3>Add labels and buttons</h3>
+        <p>Chain as many components as you need. The widget auto-sizes to fit.</p>
+        <div class="code-wrap" data-label="localscript.luau">
+<pre><span class="var">widget</span>
+  :<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>()
+      <span class="kw">return</span> <span class="fn">tostring</span>(<span class="fn">math.round</span>(<span class="num">1</span> / <span class="var">game</span>:GetService(<span class="str">"RunService"</span>).RenderStepped:Wait()))
+  <span class="kw">end</span>)
+  :<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
+      <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">game</span>:GetService(<span class="str">"Stats"</span>).Network.ServerStatsItem[<span class="str">"Data Ping"</span>].Value) .. <span class="str">" ms"</span>
+  <span class="kw">end</span>)
+  :<span class="fn">AddButton</span>(<span class="str">"Reset"</span>, <span class="kw">function</span>()
+      <span class="var">game</span>.Players.LocalPlayer.Character:BreakJoints()
+  <span class="kw">end</span>)</pre>
         </div>
-        <pre><code>ReplicatedStorage
-└── Widgengine          ← recommended shared location
-    └── UIBuilder
-
-StarterPlayerScripts
-└── Widgengine          ← also fine
-    └── UIBuilder
-
-LocalScript
-└── Widgengine          ← fine if only used by one script
-    └── UIBuilder</code></pre>
-      </div>
-
-      <ul class="steps">
-        <li><p>Download and insert the <code>.rbxm</code> into your place. <code>UIBuilder</code> is already nested inside — no extra setup needed.</p></li>
-        <li><p>Move <code>Widgengine</code> to any location accessible by a LocalScript. <code>ReplicatedStorage</code> is recommended when multiple scripts need it.</p></li>
-        <li><p>Require Widgengine from a <strong>LocalScript</strong>. The module warns and returns <code>nil</code> if required from the server.</p></li>
-        <li><p>Call <code>Widgengine.New("Title")</code> and chain your labels, buttons, and containers.</p></li>
-      </ul>
-
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua · LocalScript</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        <div class="callout">
+          <span class="callout-icon">// NOTE</span>
+          <p>Labels update automatically. You don't call <code>:AddLabel</code> in a loop — just supply the callback once and Widgengine handles the polling.</p>
         </div>
-        <pre><code><cm>-- from ReplicatedStorage (shared)</cm>
-<kw>local</kw> Widgengine <op>=</op> <fn>require</fn>(game.ReplicatedStorage.Widgengine)
-
-<cm>-- or from script-relative path</cm>
-<kw>local</kw> Widgengine <op>=</op> <fn>require</fn>(script.Parent.Widgengine)
-
-<kw>local</kw> widget <op>=</op> Widgengine.<fn>New</fn>(<str>"Debugger"</str>)
-
-widget
-  :<fn>AddLabel</fn>(<str>"FPS"</str>,  getFPS)
-  :<fn>AddLabel</fn>(<str>"Ping"</str>, getPing, <kw>false</kw>)
-  :<fn>AddButton</fn>(<str>"Respawn"</str>, <kw>function</kw>() player:<fn>LoadCharacter</fn>() <kw>end</kw>)
-
-widget:<fn>AddContainer</fn>(<str>"Movement"</str>)
-  :<fn>AddButton</fn>(<str>"Fly"</str>,    toggleFly)
-  :<fn>AddButton</fn>(<str>"Noclip"</str>, toggleNoclip)</code></pre>
       </div>
-    </section>
+    </div>
 
-    <!-- CONCEPTS -->
-    <section class="doc-section" id="concepts">
-      <div class="eyebrow">02 · Architecture</div>
-      <h2><span class="h2-arr"></span>Core Concepts <span class="h2-sub">how it works</span></h2>
+  </div>
+</section>
 
-      <h3>Widget Identity</h3>
-      <p>Each widget is registered by its title string in <code>Widgengine.Widgets</code>. Calling <code>.New()</code> twice with the same title logs a warning and returns <code>nil</code>. Titles are also set as the <code>Name</code> property of the UI frame.</p>
+<div class="divider"></div>
 
-      <h3>List vs Grid Layouts</h3>
-      <p>The root widget container uses <strong>UIListLayout</strong> — labels and buttons stack vertically as full-width rows. When you call <code>:AddContainer()</code>, a sub-section is created using <strong>UIGridLayout</strong> with cells fixed at <code>74×36px</code>, wrapping horizontally.</p>
+<!-- API -->
+<section id="api">
+  <div class="api-section-inner">
+    <p class="section-tag">// Reference</p>
+    <h2>API</h2>
+    <p class="section-lead">Click any entry to expand its parameters and return type.</p>
 
-      <h3>AutomaticSize</h3>
-      <p>Both the root container and every sub-container use <code>AutomaticSize = Y</code>, so the widget's height is always exact. A <code>GetPropertyChangedSignal("AbsoluteSize")</code> listener keeps the border <code>Stroke</code> frame perfectly in sync — no manual height math anywhere.</p>
+    <!-- Widgengine -->
+    <div class="api-group">
+      <p class="api-group-title">// Widgengine</p>
 
-      <h3>Dropdown Toggle</h3>
-      <p>The small arrow in the title bar toggles between expanded (<code>Dropped = true</code>) and collapsed. When collapsed, the <code>Container</code> is hidden and the <code>Stroke</code> border shrinks to match just the title bar height. The arrow rotates 180°.</p>
-
-      <div class="callout info">
-        <span class="callout-icon">ℹ</span>
-        <p>Widgengine is <strong>client-only</strong>. Any <code>.New()</code> call from a server Script produces a warning and returns <code>nil</code> immediately. Always place the require inside a LocalScript.</p>
-      </div>
-
-      <h3>Method Chaining</h3>
-      <p>All methods return <code>self</code>, so you can chain calls fluently. The one exception is <code>:AddContainer()</code>, which returns a new <code>SubContainer</code> — intentionally breaking the chain so you can populate the grid separately.</p>
-    </section>
-
-    <!-- ═══ Widgengine.New ═══ -->
-    <section class="doc-section" id="new">
-      <div class="eyebrow">Widgengine API · Static</div>
-      <h2><span class="h2-arr"></span>Widgengine.New <span class="h2-sub">creates a widget</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-static">static</span>
-          <div class="api-sig">
-            <span class="sig-fn">Widgengine.New</span>(<span class="sig-param">WidgetTitle</span><span class="sig-type">: string</span>)
-            <span class="sig-type"> → </span><span class="sig-ret">Widgengine?</span>
-          </div>
+      <!-- New -->
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">Widgengine.New</span>
+          <span class="api-sig">(WidgetTitle: string) → Widgengine</span>
+          <span class="api-badge badge-static">static</span>
+          <span class="chevron">▾</span>
         </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ Widgengine | nil</div>
-          <p>Creates a new draggable widget panel registered under <code>WidgetTitle</code>. Returns the Widgengine object on success. Returns <code>nil</code> if called from the server, or if a widget with that title already exists.</p>
-          <p>The widget is immediately rendered in <code>PlayerGui.DebugGui</code>, visible and expanded by default.</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Creates a new draggable, collapsible widget panel and adds it to the player's <code>ScreenGui</code>. Returns the widget object for chaining. Calling this on the server or with a duplicate title emits a warning and returns <code>nil</code>.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>WidgetTitle</td><td>string</td><td>Unique name shown in the title bar. Used as the registry key and the Frame's Name property.</td></tr>
+            <tr><td>WidgetTitle</td><td>string</td><td>Unique name shown in the widget's title bar. Also used as the key in <code>Widgengine.Widgets</code>.</td></tr>
           </table>
+          <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <!-- AddLabel -->
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">:AddLabel</span>
+          <span class="api-sig">(name, callback, useRunService?) → Widgengine</span>
+          <span class="api-badge badge-method">method</span>
+          <span class="api-badge badge-chain">chainable</span>
+          <span class="chevron">▾</span>
         </div>
-        <pre><code><kw>local</kw> widget <op>=</op> Widgengine.<fn>New</fn>(<str>"Debug"</str>)
-
-<kw>if not</kw> widget <kw>then return end</kw> <cm>-- server or duplicate</cm></code></pre>
-      </div>
-    </section>
-
-    <!-- ═══ :AddLabel ═══ -->
-    <section class="doc-section" id="addlabel">
-      <div class="eyebrow">Widgengine API · Method</div>
-      <h2><span class="h2-arr"></span>:AddLabel <span class="h2-sub">key / value row</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-method">method</span>
-          <div class="api-sig">
-            <span class="sig-self">widget</span>:<span class="sig-fn">AddLabel</span>(
-              <span class="sig-param">itemName</span><span class="sig-type">: string</span>,
-              <span class="sig-param">callback</span><span class="sig-type">: ()→string</span>,
-              <span class="sig-param">useRunService</span><span class="sig-type">?: boolean</span>
-            )<span class="sig-type"> → </span><span class="sig-ret">Widgengine</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ self — chainable</div>
-          <p>Appends a full-width key/value row to the widget. The left side shows <code>itemName</code> as a static label; the right side is updated by calling <code>callback</code> on a schedule.</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Adds a two-column row: a left-aligned name and a right-aligned value that refreshes automatically by invoking your callback. The label spans the full widget width and always breaks the button row, starting a new row for any subsequent buttons.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>itemName</td><td>string</td><td>Left-side label text. Also used as the instance Name.</td></tr>
-            <tr><td>callback</td><td>()→string</td><td>Called repeatedly. Return value is shown on the right side of the row.</td></tr>
-            <tr><td>useRunService</td><td>boolean?</td><td>Default <code>true</code>. When true, fires every frame via <code>RenderStepped</code>. When false, polls every 0.5s. Use false for expensive reads.</td></tr>
+            <tr><td>name</td><td>string</td><td>Static label shown on the left side of the row.</td></tr>
+            <tr><td>callback</td><td>() → string</td><td>Called repeatedly. The returned string is displayed on the right side.</td></tr>
+            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>true</strong>. When true the callback fires every <code>RenderStepped</code> (every frame). Set to <code>false</code> for a 0.5 s polling loop — better for cheap stats like ping.</td></tr>
           </table>
-          <div class="callout tip">
-            <span class="callout-icon">💡</span>
-            <p>Pass <code>false</code> as the third arg for values that don't need frame-rate updates — server stats, inventory counts, configuration values.</p>
-          </div>
+          <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <!-- AddButton -->
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">:AddButton</span>
+          <span class="api-sig">(name, callback) → Widgengine</span>
+          <span class="api-badge badge-method">method</span>
+          <span class="api-badge badge-chain">chainable</span>
+          <span class="chevron">▾</span>
         </div>
-        <pre><code>widget
-  :<fn>AddLabel</fn>(<str>"FPS"</str>, <kw>function</kw>()
-      <kw>return</kw> <fn>tostring</fn>(math.<fn>floor</fn>(<num>1</num> <op>/</op> deltaTime))
-  <kw>end</kw>)  <cm>-- every frame (default)</cm>
-
-  :<fn>AddLabel</fn>(<str>"Ping"</str>, <kw>function</kw>()
-      <kw>return</kw> <fn>tostring</fn>(ping) <op>..</op> <str>" ms"</str>
-  <kw>end</kw>, <kw>false</kw>)  <cm>-- every 0.5s</cm></code></pre>
-      </div>
-    </section>
-
-    <!-- ═══ :AddButton ═══ -->
-    <section class="doc-section" id="addbutton">
-      <div class="eyebrow">Widgengine API · Method</div>
-      <h2><span class="h2-arr"></span>:AddButton <span class="h2-sub">full-width button</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-method">method</span>
-          <div class="api-sig">
-            <span class="sig-self">widget</span>:<span class="sig-fn">AddButton</span>(
-              <span class="sig-param">itemName</span><span class="sig-type">: string</span>,
-              <span class="sig-param">callback</span><span class="sig-type">: ()→nil</span>
-            )<span class="sig-type"> → </span><span class="sig-ret">Widgengine</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ self — chainable</div>
-          <p>Appends a full-width clickable button to the widget list. Buttons include hover and press colour tweens driven by <code>TweenService</code>. Styled with a <code>UICorner</code> (4px) and an accent <code>UIStroke</code>.</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Adds a full-width button to the widget. The button has hover and press colour tweens built in. If <code>name</code> starts with <code>rbxassetid://</code> the text is hidden and a centred <code>ImageLabel</code> is rendered instead, letting you use any Roblox asset as an icon.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>itemName</td><td>string</td><td>Text shown on the button face. Also the instance Name.</td></tr>
-            <tr><td>callback</td><td>()→nil</td><td>Called once per click via <code>Activated</code>.</td></tr>
+            <tr><td>name</td><td>string</td><td>Button label text, <em>or</em> an <code>rbxassetid://</code> URL to render an icon.</td></tr>
+            <tr><td>callback</td><td>() → nil</td><td>Fired when the button is activated (clicked or tapped).</td></tr>
           </table>
+          <div class="return-note">Returns <span>Widgengine</span> — the widget instance (chainable).</div>
         </div>
       </div>
 
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+      <!-- AddContainer -->
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">:AddContainer</span>
+          <span class="api-sig">(containerName: string) → SubContainer</span>
+          <span class="api-badge badge-method">method</span>
+          <span class="chevron">▾</span>
         </div>
-        <pre><code>widget
-  :<fn>AddButton</fn>(<str>"Respawn"</str>, <kw>function</kw>()
-      player:<fn>LoadCharacter</fn>()
-  <kw>end</kw>)
-  :<fn>AddButton</fn>(<str>"Kill"</str>, <kw>function</kw>()
-      player.Character.Humanoid.Health <op>=</op> <num>0</num>
-  <kw>end</kw>)</code></pre>
-      </div>
-    </section>
-
-    <!-- ═══ :AddContainer ═══ -->
-    <section class="doc-section" id="addcontainer">
-      <div class="eyebrow">Widgengine API · Method</div>
-      <h2><span class="h2-arr"></span>:AddContainer <span class="h2-sub">grid sub-section</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-method">method</span>
-          <div class="api-sig">
-            <span class="sig-self">widget</span>:<span class="sig-fn">AddContainer</span>(
-              <span class="sig-param">containerName</span><span class="sig-type">: string</span>
-            )<span class="sig-type"> → </span><span class="sig-ret">SubContainer</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ SubContainer — NOT self</div>
-          <p>Inserts a titled sub-section that uses <strong>UIGridLayout</strong> instead of a list. Returns a <code>SubContainer</code> object. Cells are <code>74×36px</code> and wrap horizontally to fill available width.</p>
-          <p>Multiple containers can be added to a single widget. Each appears as a labelled section with a 1px accent divider at its top edge.</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Inserts a visually distinct sub-section with its own header label and a semi-transparent background. Returns a <strong>SubContainer</strong> rather than the parent widget — use the SubContainer methods to populate it. To add more items to the parent widget after calling <code>:AddContainer</code>, store the widget reference beforehand.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>containerName</td><td>string</td><td>Section header text (accent colour) and instance Name.</td></tr>
+            <tr><td>containerName</td><td>string</td><td>Header text shown above the grouped content.</td></tr>
           </table>
-          <div class="callout warn">
-            <span class="callout-icon">⚠</span>
-            <p><code>:AddContainer()</code> returns a <strong>SubContainer</strong>, not <code>Widgengine</code>. The chain is intentionally broken. Store the result or chain immediately to populate the grid.</p>
-          </div>
+          <div class="return-note">Returns <span>SubContainer</span> — a new sub-container instance.</div>
         </div>
       </div>
+    </div>
 
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+    <!-- SubContainer -->
+    <div class="api-group">
+      <p class="api-group-title">// SubContainer</p>
+
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">:AddButton</span>
+          <span class="api-sig">(name, callback) → SubContainer</span>
+          <span class="api-badge badge-method">method</span>
+          <span class="api-badge badge-chain">chainable</span>
+          <span class="chevron">▾</span>
         </div>
-        <pre><code><kw>local</kw> movement <op>=</op> widget:<fn>AddContainer</fn>(<str>"Movement"</str>)
-movement
-  :<fn>AddButton</fn>(<str>"Fly"</str>,    toggleFly)
-  :<fn>AddButton</fn>(<str>"Noclip"</str>, toggleNoclip)
-  :<fn>AddButton</fn>(<str>"Speed"</str>,  toggleSpeed)
-
-<cm>-- Multiple containers per widget is fine</cm>
-widget:<fn>AddContainer</fn>(<str>"World"</str>)
-  :<fn>AddButton</fn>(<str>"Day"</str>,   setDay)
-  :<fn>AddButton</fn>(<str>"Night"</str>, setNight)</code></pre>
-      </div>
-    </section>
-
-    <!-- ═══ SubContainer:AddButton ═══ -->
-    <section class="doc-section" id="sub-addbutton">
-      <div class="eyebrow">SubContainer API · Method</div>
-      <h2><span class="h2-arr"></span>SubContainer:AddButton <span class="h2-sub">grid cell button</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-class">class</span>
-          <div class="api-sig">
-            <span class="sig-self">container</span>:<span class="sig-fn">AddButton</span>(
-              <span class="sig-param">itemName</span><span class="sig-type">: string</span>,
-              <span class="sig-param">callback</span><span class="sig-type">: ()→nil</span>
-            )<span class="sig-type"> → </span><span class="sig-ret">SubContainer</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ self — chainable</div>
-          <p>Adds a button cell to the grid. Same hover/press tween behaviour as the root <code>:AddButton()</code>. Cell size is owned by the <code>UIGridLayout</code> (<code>74×36px</code>).</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Adds a button to the sub-container. Buttons are auto-arranged into rows of up to two. When a row is full a new one is created automatically. Supports <code>rbxassetid://</code> icons exactly like the top-level <code>:AddButton</code>.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>itemName</td><td>string</td><td>Cell label text and instance Name.</td></tr>
-            <tr><td>callback</td><td>()→nil</td><td>Called on Activated.</td></tr>
+            <tr><td>name</td><td>string</td><td>Button label text or an <code>rbxassetid://</code> icon URL.</td></tr>
+            <tr><td>callback</td><td>() → nil</td><td>Fired on button activation.</td></tr>
           </table>
+          <div class="return-note">Returns <span>SubContainer</span> — chainable.</div>
         </div>
       </div>
-    </section>
 
-    <!-- ═══ SubContainer:AddLabel ═══ -->
-    <section class="doc-section" id="sub-addlabel">
-      <div class="eyebrow">SubContainer API · Method</div>
-      <h2><span class="h2-arr"></span>SubContainer:AddLabel <span class="h2-sub">grid cell label</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-class">class</span>
-          <div class="api-sig">
-            <span class="sig-self">container</span>:<span class="sig-fn">AddLabel</span>(
-              <span class="sig-param">itemName</span><span class="sig-type">: string</span>,
-              <span class="sig-param">callback</span><span class="sig-type">: ()→string</span>,
-              <span class="sig-param">useRunService</span><span class="sig-type">?: boolean</span>
-            )<span class="sig-type"> → </span><span class="sig-ret">SubContainer</span>
-          </div>
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">:AddLabel</span>
+          <span class="api-sig">(name, callback, useRunService?) → SubContainer</span>
+          <span class="api-badge badge-method">method</span>
+          <span class="api-badge badge-chain">chainable</span>
+          <span class="chevron">▾</span>
         </div>
-        <div class="api-card-body">
-          <div class="ret-pill">↩ self — chainable</div>
-          <p>Adds a read-only label cell to the grid. <strong>Defaults <code>useRunService</code> to <code>false</code></strong> (unlike the root <code>:AddLabel()</code> which defaults to <code>true</code>). Grid labels are typically less performance-critical, so polling every 0.5s is the safer default.</p>
-          <table class="params">
+        <div class="api-body">
+          <p class="api-desc">Adds a live-updating label row inside the sub-container. The label always breaks the current button row, just as it does at the top level. Defaults <code>useRunService</code> to <strong>false</strong> (0.5 s poll) rather than <code>RenderStepped</code>.</p>
+          <table class="param-table">
             <tr><th>Parameter</th><th>Type</th><th>Description</th></tr>
-            <tr><td>itemName</td><td>string</td><td>Label title and instance Name.</td></tr>
-            <tr><td>callback</td><td>()→string</td><td>Returns the cell's display value.</td></tr>
-            <tr><td>useRunService</td><td>boolean?</td><td>Default <code>false</code>. Pass <code>true</code> for per-frame updates.</td></tr>
+            <tr><td>name</td><td>string</td><td>Static title shown on the left.</td></tr>
+            <tr><td>callback</td><td>() → string</td><td>Returns the value to display on the right.</td></tr>
+            <tr><td>useRunService</td><td>boolean?</td><td>Defaults to <strong>false</strong>. Set true for per-frame updates.</td></tr>
           </table>
+          <div class="return-note">Returns <span>SubContainer</span> — chainable.</div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- ═══ UIBuilder Overview ═══ -->
-    <section class="doc-section" id="uibuilder">
-      <div class="eyebrow">Internal Module</div>
-      <h2><span class="h2-arr"></span>UIBuilder <span class="h2-sub">instance factory</span></h2>
+    <!-- Properties -->
+    <div class="api-group">
+      <p class="api-group-title">// Properties</p>
 
-      <p>UIBuilder is the internal template factory required automatically by Widgengine. It should sit as a child ModuleScript. <strong>You do not interact with UIBuilder directly</strong> in normal usage — this section is for contributors and anyone extending the system.</p>
-
-      <div class="callout info">
-        <span class="callout-icon">ℹ</span>
-        <p>Each Build function increments a module-level <code>index</code> counter by <code>10000</code>. This ensures <code>ZIndex</code> layering is always correct for multiple stacked widgets.</p>
-      </div>
-    </section>
-
-    <!-- BuildWidget -->
-    <section class="doc-section" id="buildwidget">
-      <div class="eyebrow">UIBuilder · Function</div>
-      <h2><span class="h2-arr"></span>BuildWidget <span class="h2-sub">root frame + chrome</span></h2>
-
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-static">static</span>
-          <div class="api-sig">
-            <span class="sig-fn">UIBuilder.BuildWidget</span>()
-            <span class="sig-type"> → </span><span class="sig-ret">Frame</span>
-          </div>
+      <div class="api-entry" onclick="toggle(this)">
+        <div class="api-header">
+          <span class="api-name">Widgengine.Widgets</span>
+          <span class="api-sig">{ [string]: WidgetData }</span>
+          <span class="api-badge badge-static">static</span>
+          <span class="chevron">▾</span>
         </div>
-        <div class="api-card-body">
-          <p>Creates the full widget frame hierarchy and injects it into <code>PlayerGui.DebugGui</code> (creating the ScreenGui if it doesn't exist). Returns the root <code>Title</code> Frame.</p>
-          <table class="props-table">
-            <tr><th>Child</th><th>Type</th><th>Role</th></tr>
-            <tr><td>t_text</td><td>TextLabel</td><td>Widget title text, left-aligned in the bar</td></tr>
-            <tr><td>Dropdown</td><td>ImageButton</td><td>Collapse / expand toggle arrow</td></tr>
-            <tr><td>Stroke</td><td>Frame + UIStroke</td><td>Accent border spanning full widget height</td></tr>
-            <tr><td>Container</td><td>CanvasGroup</td><td>Content area; AutomaticSize Y, UIListLayout</td></tr>
-            <tr><td>UIDragDetector</td><td>UIDragDetector</td><td>Makes the widget draggable by its title bar</td></tr>
-          </table>
+        <div class="api-body">
+          <p class="api-desc">A shared table keyed by widget title that stores every created widget's data. Useful for accessing a widget's <code>UI</code> frame or its <code>Dropped</code> state from outside the creation scope. Direct mutation is not recommended.</p>
+          <div class="return-note">Type <span>{ [string]: { UI: Frame, Dropped: boolean, Connections: {}, _layoutOrder: number } }</span></div>
         </div>
       </div>
-    </section>
+    </div>
 
-    <!-- BuildLabel -->
-    <section class="doc-section" id="buildlabel">
-      <div class="eyebrow">UIBuilder · Function</div>
-      <h2><span class="h2-arr"></span>BuildLabel <span class="h2-sub">key / value template</span></h2>
+  </div>
+</section>
 
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-static">static</span>
-          <div class="api-sig">
-            <span class="sig-fn">UIBuilder.BuildLabel</span>()
-            <span class="sig-type"> → </span><span class="sig-ret">TextLabel</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <p>Returns a <code>TextLabel</code> (the root element) configured for <strong>value display</strong> (right-aligned). It contains a child <code>TextLabel</code> named <code>Title</code> that displays the key (left-aligned). Both are capped at <code>MaxTextSize = 18</code> via <code>UITextSizeConstraint</code>.</p>
-          <p>The caller sets Name, Title.Text, and Size after receiving the template.</p>
-        </div>
-      </div>
-    </section>
+<div class="divider"></div>
 
-    <!-- BuildButton -->
-    <section class="doc-section" id="buildbutton">
-      <div class="eyebrow">UIBuilder · Function</div>
-      <h2><span class="h2-arr"></span>BuildButton <span class="h2-sub">unsized button template</span></h2>
+<!-- EXAMPLES -->
+<section class="section" id="examples">
+  <p class="section-tag">// Examples</p>
+  <h2>Full examples</h2>
+  <p class="section-lead">Copy-paste ready. Drop inside a LocalScript and adjust paths.</p>
 
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-static">static</span>
-          <div class="api-sig">
-            <span class="sig-fn">UIBuilder.BuildButton</span>()
-            <span class="sig-type"> → </span><span class="sig-ret">TextButton</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <p>Returns a <code>TextButton</code> with a <code>UICorner</code> (4px), an accent <code>UIStroke</code>, and <code>AutoButtonColor = false</code>. <strong>No size is set</strong> — the caller provides size so the same template works as both a full-width list row and a compact grid cell.</p>
-          <p>Hover and press tweens are attached externally by <code>attachButtonEffects()</code> inside Widgengine, not UIBuilder.</p>
-        </div>
-      </div>
-    </section>
+  <div class="example-pair">
+    <div class="example-panel">
+      <h4>// complete debugger widget</h4>
+<pre><span class="kw">local</span> <span class="var">RunService</span>  = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"RunService"</span>)
+<span class="kw">local</span> <span class="var">Stats</span>       = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"Stats"</span>)
+<span class="kw">local</span> <span class="var">Widgengine</span>  = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
 
-    <!-- BuildSubContainer -->
-    <section class="doc-section" id="buildsubcontainer">
-      <div class="eyebrow">UIBuilder · Function</div>
-      <h2><span class="h2-arr"></span>BuildSubContainer <span class="h2-sub">grid section wrapper</span></h2>
+<span class="kw">local</span> <span class="var">fps</span> = <span class="num">0</span>
+<span class="var">RunService</span>.RenderStepped:<span class="fn">Connect</span>(<span class="kw">function</span>(<span class="var">dt</span>)
+    <span class="var">fps</span> = <span class="fn">math.round</span>(<span class="num">1</span> / <span class="var">dt</span>)
+<span class="kw">end</span>)
 
-      <div class="api-card">
-        <div class="api-card-head">
-          <span class="method-badge mb-static">static</span>
-          <div class="api-sig">
-            <span class="sig-fn">UIBuilder.BuildSubContainer</span>()
-            <span class="sig-type"> → </span><span class="sig-ret">Frame</span>
-          </div>
-        </div>
-        <div class="api-card-body">
-          <p>Returns a <code>Frame</code> wrapper with <code>AutomaticSize = Y</code>. The wrapper grows vertically as cells are added. Children:</p>
-          <table class="props-table">
-            <tr><th>Child</th><th>Type</th><th>Role</th></tr>
-            <tr><td>Divider</td><td>Frame</td><td>1px accent-tinted separator at section top</td></tr>
-            <tr><td>Header</td><td>TextLabel</td><td>Section name in accent colour, 17px tall</td></tr>
-            <tr><td>Inner</td><td>CanvasGroup</td><td>Grid canvas; UIGridLayout with 74×36px cells, 4px gap, AutomaticSize Y</td></tr>
-          </table>
-        </div>
-      </div>
-    </section>
+<span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Debugger"</span>)
+    :<span class="fn">AddLabel</span>(<span class="str">"FPS"</span>, <span class="kw">function</span>() <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">fps</span>) <span class="kw">end</span>, <span class="kw">false</span>)
+    :<span class="fn">AddLabel</span>(<span class="str">"Ping"</span>, <span class="kw">function</span>()
+        <span class="kw">return</span> <span class="fn">tostring</span>(<span class="fn">math.round</span>(
+            <span class="var">Stats</span>.Network.ServerStatsItem[<span class="str">"Data Ping"</span>].Value
+        )) .. <span class="str">" ms"</span>
+    <span class="kw">end</span>, <span class="kw">false</span>)</pre>
+    </div>
+  </div>
 
-    <!-- CHAINING -->
-    <section class="doc-section" id="chaining">
-      <div class="eyebrow">Guide</div>
-      <h2><span class="h2-arr"></span>Method Chaining <span class="h2-sub">fluent api patterns</span></h2>
+  <div class="example-pair" style="margin-top:1px;">
+    <div class="example-panel">
+      <h4>// widget with sub-containers and icon buttons</h4>
+<pre><span class="kw">local</span> <span class="var">Widgengine</span> = <span class="fn">require</span>(<span class="var">game</span>.ReplicatedStorage.Widgengine)
+<span class="kw">local</span> <span class="var">Players</span>    = <span class="var">game</span>:<span class="fn">GetService</span>(<span class="str">"Players"</span>)
+<span class="kw">local</span> <span class="var">lp</span>         = <span class="var">Players</span>.LocalPlayer
 
-      <p>Every method on both <code>Widgengine</code> and <code>SubContainer</code> returns <code>self</code>. The single exception is <code>:AddContainer()</code>, which returns a new <code>SubContainer</code>. This lets you write highly readable setup code in one expression.</p>
+<span class="kw">local</span> <span class="var">info</span> = <span class="var">Widgengine</span>.<span class="fn">New</span>(<span class="str">"Information"</span>)
 
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua · chaining patterns</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
-        </div>
-        <pre><code><cm>-- All root items in one chain from .New()</cm>
-<kw>local</kw> widget <op>=</op> Widgengine.<fn>New</fn>(<str>"Performance"</str>)
-  :<fn>AddLabel</fn>(<str>"FPS"</str>,    getFPS)
-  :<fn>AddLabel</span>(<str>"Ping"</str>,   getPing,   <kw>false</kw>)
-  :<fn>AddLabel</fn>(<str>"Memory"</str>, getMemory, <kw>false</kw>)
-  :<fn>AddButton</fn>(<str>"GC"</str>,    collectGarbage)
+<span class="cm">-- top-level labels</span>
+<span class="var">info</span>
+    :<span class="fn">AddLabel</span>(<span class="str">"Parts"</span>, <span class="kw">function</span>()
+        <span class="kw">return</span> <span class="fn">tostring</span>(#<span class="var">workspace</span>:<span class="fn">GetDescendants</span>())
+    <span class="kw">end</span>, <span class="kw">false</span>)
+    :<span class="fn">AddLabel</span>(<span class="str">"Models"</span>, <span class="kw">function</span>()
+        <span class="kw">local</span> <span class="var">n</span> = <span class="num">0</span>
+        <span class="kw">for</span> _, v <span class="kw">in</span> <span class="var">workspace</span>:<span class="fn">GetChildren</span>() <span class="kw">do</span>
+            <span class="kw">if</span> v:IsA(<span class="str">"Model"</span>) <span class="kw">then</span> <span class="var">n</span> += <span class="num">1</span> <span class="kw">end</span>
+        <span class="kw">end</span>
+        <span class="kw">return</span> <span class="fn">tostring</span>(<span class="var">n</span>)
+    <span class="kw">end</span>, <span class="kw">false</span>)
 
-<cm>-- AddContainer returns SubContainer — new chain</cm>
-widget:<fn>AddContainer</fn>(<str>"Graphics"</str>)
-  :<fn>AddButton</fn>(<str>"Shadows"</str>, toggleShadows)
-  :<fn>AddButton</fn>(<str>"Fog"</str>,     toggleFog)
-  :<fn>AddLabel</fn>(<str>"Quality"</str>, getQuality)
+<span class="cm">-- "Utils" sub-container with icon + text buttons</span>
+<span class="var">info</span>:<span class="fn">AddContainer</span>(<span class="str">"Utils"</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Reset"</span>,   <span class="kw">function</span>() <span class="var">lp</span>.Character:BreakJoints() <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Summon"</span>,  <span class="kw">function</span>() <span class="cm">--[[ teleport logic ]]</span> <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"rbxassetid://12345678"</span>, <span class="kw">function</span>() <span class="cm">--[[ broom icon ]]</span> <span class="kw">end</span>)
 
-<cm>-- Second container on same widget — still fine</cm>
-widget:<fn>AddContainer</fn>(<str>"Audio"</str>)
-  :<fn>AddButton</fn>(<str>"Mute"</str>, toggleMute)
-  :<fn>AddLabel</fn>(<str>"Vol"</str>,   getVolume)</code></pre>
-      </div>
+<span class="cm">-- "MyContainer" sub-container</span>
+<span class="var">info</span>:<span class="fn">AddContainer</span>(<span class="str">"MyContainer"</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test"</span>,  <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test"</span>)  <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test2"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test2"</span>) <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test3"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test3"</span>) <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test4"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test4"</span>) <span class="kw">end</span>)
+    :<span class="fn">AddButton</span>(<span class="str">"Test5"</span>, <span class="kw">function</span>() <span class="fn">print</span>(<span class="str">"Test5"</span>) <span class="kw">end</span>)</pre>
+    </div>
+  </div>
 
-      <div class="callout tip">
-        <span class="callout-icon">💡</span>
-        <p>You only need to store the widget reference if you plan to call <code>:AddContainer()</code> after the initial chain. If everything is set up in one go, the return value of <code>.New()</code> can be discarded.</p>
-      </div>
-    </section>
+  <div class="callout" style="margin-top:2rem;">
+    <span class="callout-icon">// TIP</span>
+    <p><strong>:AddContainer returns the SubContainer, not the widget.</strong> If you need to keep adding items to the parent widget after a container, store the widget in a variable first and call the methods on it separately — do not chain <code>:AddContainer(...):AddButton(...)</code> and then continue chaining on the widget.</p>
+  </div>
+</section>
 
-    <!-- EXAMPLES -->
-    <section class="doc-section" id="examples">
-      <div class="eyebrow">Guide</div>
-      <h2><span class="h2-arr"></span>Full Examples <span class="h2-sub">complete scripts</span></h2>
+<div class="divider"></div>
 
-      <h3>Performance Monitor</h3>
-
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua · performance monitor</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
-        </div>
-        <pre><code><kw>local</kw> RunService <op>=</op> game:<fn>GetService</fn>(<str>"RunService"</str>)
-<kw>local</kw> Stats      <op>=</op> game:<fn>GetService</fn>(<str>"Stats"</str>)
-<kw>local</kw> Widgengine <op>=</op> <fn>require</fn>(script.Parent.Widgengine)
-
-<kw>local</kw> lastTime <op>=</op> <fn>tick</fn>()
-<kw>local</kw> fps <op>=</op> <num>0</num>
-
-RunService.RenderStepped:<fn>Connect</fn>(<kw>function</kw>()
-  <kw>local</kw> now <op>=</op> <fn>tick</fn>()
-  fps <op>=</op> math.<fn>floor</fn>(<num>1</num> <op>/</op> (now <op>-</op> lastTime))
-  lastTime <op>=</op> now
-<kw>end</kw>)
-
-Widgengine.<fn>New</fn>(<str>"Perf"</str>)
-  :<fn>AddLabel</fn>(<str>"FPS"</str>,    <kw>function</kw>() <kw>return</kw> <fn>tostring</fn>(fps) <kw>end</kw>)
-  :<fn>AddLabel</fn>(<str>"Ping"</str>,   <kw>function</kw>()
-      <kw>return</kw> <fn>tostring</fn>(Stats.Network.ServerStatsItem[<str>"Data Ping"</str>].Value) <op>..</op> <str>" ms"</str>
-  <kw>end</kw>, <kw>false</kw>)
-  :<fn>AddLabel</fn>(<str>"Heap"</str>,   <kw>function</kw>()
-      <kw>return</kw> string.<fn>format</fn>(<str>"%.0f MB"</str>, Stats.DataModel.DataModelStats.TotalMemoryUsed <op>/</op> <num>1024</num>)
-  <kw>end</kw>, <kw>false</kw>)</code></pre>
-      </div>
-
-      <h3>Full Debug Panel</h3>
-
-      <div class="code-block">
-        <div class="code-top">
-          <div class="tl"><span class="r"></span><span class="y"></span><span class="g"></span></div>
-          <span class="code-lang">lua · debug control panel</span>
-          <button class="copy-btn" onclick="copyCode(this)">copy</button>
-        </div>
-        <pre><code><kw>local</kw> Players    <op>=</op> game:<fn>GetService</fn>(<str>"Players"</str>)
-<kw>local</kw> Lighting   <op>=</op> game:<fn>GetService</fn>(<str>"Lighting"</str>)
-<kw>local</kw> Widgengine <op>=</op> <fn>require</fn>(script.Parent.Widgengine)
-
-<kw>local</kw> player <op>=</op> Players.LocalPlayer
-
-<kw>local</kw> widget <op>=</op> Widgengine.<fn>New</fn>(<str>"Debug"</str>)
-  :<fn>AddLabel</fn>(<str>"Position"</str>, <kw>function</kw>()
-      <kw>local</kw> root <op>=</op> player.Character and player.Character.HumanoidRootPart
-      <kw>if not</kw> root <kw>then return</kw> <str>"—"</str> <kw>end</kw>
-      <kw>local</kw> p <op>=</op> root.Position
-      <kw>return</kw> string.<fn>format</fn>(<str>"%.0f, %.0f, %.0f"</str>, p.X, p.Y, p.Z)
-  <kw>end</kw>)
-  :<fn>AddButton</fn>(<str>"Respawn"</str>, <kw>function</kw>() player:<fn>LoadCharacter</fn>() <kw>end</kw>)
-
-widget:<fn>AddContainer</fn>(<str>"Cheats"</str>)
-  :<fn>AddButton</fn>(<str>"Fly"</str>,      toggleFly)
-  :<fn>AddButton</fn>(<str>"Noclip"</str>,   toggleNoclip)
-  :<fn>AddButton</fn>(<str>"Inf Jump"</str>, toggleInfJump)
-
-widget:<fn>AddContainer</fn>(<str>"World"</str>)
-  :<fn>AddButton</fn>(<str>"Day"</str>,   <kw>function</kw>() Lighting.TimeOfDay <op>=</op> <str>"12:00:00"</str> <kw>end</kw>)
-  :<fn>AddButton</fn>(<str>"Night"</str>, <kw>function</kw>() Lighting.TimeOfDay <op>=</op> <str>"00:00:00"</str> <kw>end</kw>)
-  :<fn>AddLabel</fn>(<str>"Time"</str>,  <kw>function</kw>() <kw>return</kw> <fn>tostring</fn>(math.<fn>floor</fn>(Lighting.ClockTime)) <op>..</op> <str>"h"</str> <kw>end</kw>)</code></pre>
-      </div>
-    </section>
-
-  </main>
-</div>
-
+<!-- FOOTER -->
 <footer>
-  <div class="footer-arr"></div>
-  <span class="footer-txt"><strong>Widgengine</strong> &nbsp;·&nbsp; v1.0 &nbsp;·&nbsp; Roblox LocalScript Module</span>
+  <div class="footer-logo">[ Widgengine ]</div>
+  <p class="footer-text">A Roblox debug UI module &nbsp;·&nbsp; Client-only &nbsp;·&nbsp; Free to use</p>
 </footer>
 
 <script>
-// ── Embedded .rbxm (base64)
-const RBXM_B64 = "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";
-
-function downloadRbxm(e) {
-  e.preventDefault();
-  const bytes = atob(RBXM_B64);
-  const buf = new Uint8Array(bytes.length);
-  for (let i = 0; i < bytes.length; i++) buf[i] = bytes.charCodeAt(i);
-  const blob = new Blob([buf], { type: 'application/octet-stream' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href     = url;
-  a.download = 'Widgengine_v2.rbxm';
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ── Progress bar
-const progress = document.getElementById('progress');
-window.addEventListener('scroll', () => {
-  const max = document.documentElement.scrollHeight - window.innerHeight;
-  progress.style.width = (window.scrollY / max * 100) + '%';
-});
-
-// ── Active nav tracking
-const sections = document.querySelectorAll('[id]');
-const links    = document.querySelectorAll('.nav-links a');
-
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      links.forEach(a => a.classList.remove('active'));
-      const hit = document.querySelector(`.nav-links a[href="#${e.target.id}"]`);
-      if (hit) hit.classList.add('active');
-    }
-  });
-}, { rootMargin: '-15% 0px -75% 0px' });
-
-sections.forEach(s => io.observe(s));
-
-// ── Copy code
-function copyCode(btn) {
-  const text = btn.closest('.code-block').querySelector('pre').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'copied!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('copied'); }, 1800);
-  });
-}
-
-// ── Mobile sidebar
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('overlay').classList.toggle('show');
-}
+  function toggle(el) {
+    const body = el.querySelector('.api-body');
+    const open = el.classList.toggle('open');
+    body.classList.toggle('open', open);
+  }
 </script>
 </body>
 </html>
